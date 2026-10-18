@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">یوتیوب‌یار</string>
+
+    <!-- کلیدهای تپسل — این‌ها را از پنل tapsell.ir پر کنید -->
+    <string name="tapsell_app_key" translatable="false"></string>
+    <string name="tapsell_zone_banner" translatable="false"></string>
+    <string name="tapsell_zone_interstitial" translatable="false"></string>
+    <string name="tapsell_zone_rewarded" translatable="false"></string>
+
+    <!-- ناوبری -->
+    <string name="nav_home">خانه</string>
+    <string name="nav_analyzer">تحلیل</string>
+    <string name="nav_ai">هوش مصنوعی</string>
+    <string name="nav_checklist">چک‌لیست</string>
+    <string name="nav_academy">آکادمی</string>
+    <string name="settings_title">تنظیمات</string>
+    <string name="premium_title">اشتراک ویژه</string>
+    <string name="back">بازگشت</string>
+
+    <!-- عمومی -->
+    <string name="ok">باشه</string>
+    <string name="cancel">انصراف</string>
+    <string name="save">ذخیره</string>
+    <string name="delete">حذف</string>
+    <string name="add">افزودن</string>
+    <string name="close">بستن</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="loading">در حال بارگذاری…</string>
+    <string name="copy">کپی</string>
+    <string name="copied">کپی شد ✓</string>
+    <string name="next">بعدی</string>
+    <string name="done">تمام شد</string>
+    <string name="error_generic">خطایی رخ داد. دوباره تلاش کنید.</string>
+    <string name="error_no_internet">این بخش به اینترنت نیاز دارد.</string>
+
+    <!-- آنبوردینگ -->
+    <string name="ob1_title">از صفر تا مانیتایز</string>
+    <string name="ob1_desc">یوتیوب‌یار همراه شما از روز اولِ ساخت کانال تا رسیدن به ۱۰۰۰ سابسکرایبر و ۴۰۰۰ ساعت واچ‌تایم است.</string>
+    <string name="ob2_title">ابزارهای هوش مصنوعی داخلی</string>
+    <string name="ob2_desc">عنوان سئوشده، توضیحات، تگ، اسکریپت و ایده ویدیو — همه بدون اینترنت و کلید API داخل خود اپ تولید می‌شوند.</string>
+    <string name="ob3_title">نقشه راه و یادآور</string>
+    <string name="ob3_desc">۴ فاز گام‌به‌گام، وظایف روزانه، یادآور نوتیفیکیشن و تحلیل کانال برای اینکه سریع‌تر به مانیتایز برسید.</string>
+    <string name="ob_next">بعدی</string>
+    <string name="ob_start">شروع کنیم!</string>
+    <string name="ob_channel_name">نام کانال شما</string>
+    <string name="ob_channel_name_hint">مثلاً: کانال آموزش گیتار من</string>
+    <string name="ob_niche">موضوع (نیش) کانال</string>
+    <string name="ob_niche_hint">مثلاً: آموزش گیتار فارسی</string>
+    <string name="ob_handle">آیدی کانال (اختیاری)</string>
+    <string name="ob_handle_hint">مثلاً: @myguitarchannel</string>
+    <string name="ob_skip">رد کردن</string>
+    <string name="ob_setup_hint">این اطلاعات برای شخصی‌سازی هوش مصنوعی و تحلیل کانال استفاده می‌شود.</string>
+
+    <!-- داشبورد -->
+    <string name="dash_hello">سلام %1$s 👋</string>
+    <string name="dash_title">پیشرفت مانیتایز</string>
+    <string name="dash_subs_progress">سابسکرایبر</string>
+    <string name="dash_hours_progress">ساعت واچ‌تایم</string>
+    <string name="dash_of_1000">از ۱۰۰۰</string>
+    <string name="dash_of_4000">از ۴۰۰۰</string>
+    <string name="dash_remaining_subs">باقی‌مانده: %1$d سابسکرایبر</string>
+    <string name="dash_remaining_hours">باقی‌مانده: %1$s ساعت</string>
+    <string name="dash_update_stats">به‌روزرسانی آمار</string>
+    <string name="dash_subs_input">سابسکرایبر فعلی</string>
+    <string name="dash_hours_input">ساعت واچ‌تایم فعلی</string>
+    <string name="dash_save">ثبت</string>
+    <string name="dash_calculator">ماشین‌حساب مانیتایز</string>
+    <string name="dash_calc_desc">با ثبت هفتگی آمار، اپ روند رشد شما را می‌سنجد و روز رسیدن به مانیتایز را تخمین می‌زند.</string>
+    <string name="dash_eta">تخمین رسیدن به هدف</string>
+    <string name="dash_eta_subs">%1$s تا ۱۰۰۰ سابسکرایبر</string>
+    <string name="dash_eta_hours">%1$s تا ۴۰۰۰ ساعت</string>
+    <string name="dash_eta_days">حدود %1$s روز</string>
+    <string name="dash_eta_need_data">برای تخمین، حداقل دو ثبت آمار (فاصله چند روز) لازم است.</string>
+    <string name="dash_milestones">مایل‌استون‌های بزرگ</string>
+    <string name="dash_requirements">شرایط رسمی مانیتایز یوتیوب</string>
+    <string name="dash_req_1">۱۰۰۰ سابسکرایبر</string>
+    <string name="dash_req_2">۴۰۰۰ ساعت واچ‌تایم عمومی در ۱۲ ماه اخیر</string>
+    <string name="dash_req_3">تأیید دومرحله‌ای (2FA) فعال</string>
+    <string name="dash_req_4">بدون استرایک فعال و رعایت قوانین</string>
+    <string name="dash_req_alt">مسیر جایگزین Shorts: ۱۰ میلیون بازدید Shorts در ۹۰ روز اخیر</string>
+    <string name="dash_chart">نمودار پیشرفت</string>
+    <string name="dash_no_history">هنوز آماری ثبت نشده. اولین ثبت را انجام بدهید تا نمودار شروع شود.</string>
+    <string name="dash_first_entry">اولین ثبت آمار شما ذخیره شد! از این به بعد نمودار پیشرفت‌تان زنده است.</string>
+    <string name="dash_channel_stats">آمار کانال شما</string>
+
+    <!-- تحلیل کانال -->
+    <string name="an_title">تحلیل کانال</string>
+    <string name="an_desc">آمار عمومی هر کانال یوتیوب را ببینید، با کانال خودتان مقایسه کنید و بینش‌های رشد بگیرید.</string>
+    <string name="an_handle">آیدی یا لینک کانال</string>
+    <string name="an_handle_hint">@channel یا youtube.com/@channel</string>
+    <string name="an_analyze">تحلیل کن</string>
+    <string name="an_own_tab">کانال من</string>
+    <string name="an_competitor_tab">تحلیل رقیب</string>
+    <string name="an_api_missing">برای تحلیل، یک کلید رایگان YouTube Data API لازم است (رایگان و از کنسول گوگل).</string>
+    <string name="an_api_hint">کلید را در تنظیمات وارد کنید.</string>
+    <string name="an_go_settings">رفتن به تنظیمات</string>
+    <string name="an_subs">سابسکرایبر</string>
+    <string name="an_total_views">کل بازدیدها</string>
+    <string name="an_videos">تعداد ویدیو</string>
+    <string name="an_avg_views">میانگین بازدید ۱۰ ویدیوی اخیر</string>
+    <string name="an_freq">ویدیو در ماه</string>
+    <string name="an_engagement">نرخ تعامل</string>
+    <string name="an_ratio">نسبت بازدید/سابسکرایبر</string>
+    <string name="an_age">سن کانال</string>
+    <string name="an_age_days">%1$s روز</string>
+    <string name="an_top_video">پربازدیدترین ویدیوی اخیر</string>
+    <string name="an_recent">۱۰ ویدیوی اخیر</string>
+    <string name="an_insights">بینش‌های خودکار</string>
+    <string name="an_not_found">کانالی با این آیدی پیدا نشد. آیدی را بدون @ یا لینک کامل بدهید.</string>
+    <string name="an_error">خطا در اتصال به یوتیوب. کلید API و اینترنت را چک کنید.</string>
+    <string name="an_vs_you">مقایسه با کانال من</string>
+    <string name="an_compare_hint">آیدی کانال رقیب را وارد کنید تا آمارش را کنار آمار کانال خودتان ببینید. آمار خودتان را از تب «کانال من» تحلیل کنید.</string>
+    <string name="an_metric">شاخص</string>
+    <string name="an_yours">من</string>
+    <string name="an_them">رقیب</string>
+    <string name="an_you_first">اول کانال خودتان را در تب «کانال من» تحلیل کنید تا مقایسه فعال شود.</string>
+
+    <!-- هوش مصنوعی -->
+    <string name="ai_title">دستیار هوش مصنوعی</string>
+    <string name="ai_desc">برای ویدیوی بعدی‌تان موضوع بدهید؛ عنوان سئوشده، توضیحات، تگ، اسکریپت و ایده تحویل بگیرید.</string>
+    <string name="ai_topic">موضوع ویدیو</string>
+    <string name="ai_topic_hint">مثلاً: آموزش آکورد‌های پایه گیتار</string>
+    <string name="ai_tone">لحن</string>
+    <string name="tone_edu">آموزشی</string>
+    <string name="tone_fun">سرگرم‌کننده</string>
+    <string name="tone_hype">هیجانی</string>
+    <string name="tone_pro">حرفه‌ای</string>
+    <string name="ai_generate">تولید کن ✨</string>
+    <string name="ai_again">نسخه دیگر</string>
+    <string name="ai_copy_all">کپی همه</string>
+    <string name="ai_history">تاریخچه</string>
+    <string name="ai_clear">پاک‌سازی</string>
+    <string name="ai_offline_badge">آفلاین</string>
+    <string name="ai_remote_badge">آنلاین</string>
+    <string name="ai_need_key">برای حالت آنلاین، سرویس و کلید API را در تنظیمات انتخاب کنید. فعلاً موتور آفلاین استفاده می‌شود.</string>
+    <string name="ai_limit_left">تولیدهای باقی‌مانده امروز: %1$s</string>
+    <string name="ai_limit_reached">سقف رایگان امروز (۵ بار) پر شد. برای نامحدود، اشتراک ویژه بگیرید یا ۲۴ ساعت رایگان با تماشای یک ویدیو باز کنید.</string>
+    <string name="ai_error_remote">سرویس آنلاین پاسخ نداد؛ با موتور آفلاین جایگزین شد.</string>
+    <string name="tool_title_gen">عنوان و سئو</string>
+    <string name="tool_desc_gen">توضیحات ویدیو</string>
+    <string name="tool_tag_gen">تگ‌ها</string>
+    <string name="tool_script_gen">اسکریپت‌نویس</string>
+    <string name="tool_idea_gen">ایده‌یاب</string>
+    <string name="tool_title_desc">۸ عنوان کلیک‌خور با امتیاز سئو</string>
+    <string name="tool_desc_desc">توضیحات کامل با تایم‌استمپ و هشتگ</string>
+    <string name="tool_tag_desc">۱۵ تگ مرتبط با موضوع</string>
+    <string name="tool_script_desc">اسکریپت قدم‌به‌قدم با هوک قوی</string>
+    <string name="tool_idea_desc">۱۰ ایده ویدیوی تازه برای کانال شما</string>
+
+    <!-- چک‌لیست -->
+    <string name="cl_title">نقشه راه مانیتایز</string>
+    <string name="cl_desc">۴ فاز از روز اول تا ارسال درخواست مانیتایز. هر وظیفه را که انجام دادید تیک بزنید.</string>
+    <string name="cl_phase1">فاز ۱ — پایه‌گذاری</string>
+    <string name="cl_phase2">فاز ۲ — تثبیت و نظم</string>
+    <string name="cl_phase3">فاز ۳ — رشد و کشف‌پذیری</string>
+    <string name="cl_phase4">فاز ۴ — آمادگی مانیتایز</string>
+    <string name="cl_progress">%1$d از %2$d وظیفه انجام شد</string>
+    <string name="cl_daily">وظایف امروز</string>
+    <string name="cl_daily_hint">این ۶ کار کوچک را هر روز انجام دهید؛ رشد پایدار از عادت روزانه می‌آید.</string>
+    <string name="cl_add_task">وظیفه سفارشی</string>
+    <string name="cl_new_task_hint">عنوان وظیفه جدید…</string>
+    <string name="cl_all_done">آفرین! همه وظایف این فاز تمام شد 🎉</string>
+    <string name="cl_reminder_on">یادآور روزانه روشن شد</string>
+    <string name="cl_reminder_off">یادآور روزانه خاموش شد</string>
+
+    <!-- آکادمی -->
+    <string name="ac_title">آکادمی یوتیوب‌یار</string>
+    <string name="ac_desc">درس‌های کوتاه و کاربردی برای رشد سریع کانال.</string>
+    <string name="ac_read">خواندن درس</string>
+    <string name="ac_mark_done">علامت‌گذاری به‌عنوان خوانده‌شده</string>
+    <string name="ac_completed">خوانده شد ✓</string>
+    <string name="ac_key_points">نکات کلیدی</string>
+    <string name="ac_minutes">%1$d دقیقه مطالعه</string>
+    <string name="ac_progress">پیشرفت آکادمی: %1$d از %2$d درس</string>
+
+    <!-- اشتراک -->
+    <string name="pr_headline">اشتراک ویژه یوتیوب‌یار</string>
+    <string name="pr_desc">همه ابزارها همیشه رایگان‌اند؛ با اشتراک ویژه تبلیغ حذف می‌شود و هوش مصنوعی نامحدود می‌شود.</string>
+    <string name="pr_active">اشتراک شما فعال است 🎉</string>
+    <string name="pr_feature_1">حذف کامل تبلیغات</string>
+    <string name="pr_feature_2">استفاده نامحدود از ابزارهای هوش مصنوعی</string>
+    <string name="pr_feature_3">اولویت در ابزارهای آینده</string>
+    <string name="pr_feature_4">حمایت از توسعه اپ رایگان</string>
+    <string name="pr_month">اشتراک ماهانه</string>
+    <string name="pr_year">اشتراک سالانه</string>
+    <string name="pr_buy">خرید اشتراک</string>
+    <string name="pr_restore">بازیابی خرید</string>
+    <string name="pr_rewarded_title">پول ندارید؟ مشکل نیست!</string>
+    <string name="pr_rewarded_desc">یک ویدیوی تبلیغاتی تماشا کنید و ۲۴ ساعت دسترسی ویژه رایگان بگیرید.</string>
+    <string name="pr_watch_ad">۲۴ ساعت ویژه رایگان</string>
+    <string name="pr_store_missing">هیچ فروشگاهی (کافه‌بازار یا مایکت) روی گوشی نصب نیست. ابتدا یکی را نصب کنید.</string>
+    <string name="pr_price_unavailable">قیمت از فروشگاه دریافت نشد</string>
+    <string name="pr_thanks">خرید شما ثبت شد. از حمایت شما سپاسگزاریم! ❤️</string>
+    <string name="pr_cancelled">خرید لغو شد.</string>
+    <string name="pr_restore_none">خرید فعالی پیدا نشد.</string>
+    <string name="pr_restore_ok">اشتراک شما بازیابی شد ✓</string>
+    <string name="pr_error">خطا در پرداخت: %1$s</string>
+
+    <!-- تنظیمات -->
+    <string name="st_appearance">ظاهر</string>
+    <string name="st_theme">تم</string>
+    <string name="st_dark">تیره</string>
+    <string name="st_light">روشن</string>
+    <string name="st_system">سیستم</string>
+    <string name="st_channel_section">اطلاعات کانال</string>
+    <string name="st_channel_hint">برای شخصی‌سازی هوش مصنوعی و تحلیل کانال.</string>
+    <string name="st_name">نام کانال</string>
+    <string name="st_handle">آیدی کانال</string>
+    <string name="st_niche">موضوع کانال</string>
+    <string name="st_keys_section">کلیدها و سرویس‌ها</string>
+    <string name="st_yt_key">کلید YouTube Data API</string>
+    <string name="st_yt_key_hint">رایگان از console.cloud.google.com — سرویس YouTube Data API v3 را فعال و کلید بسازید</string>
+    <string name="st_ai_provider">سرویس هوش مصنوعی</string>
+    <string name="st_ai_key">کلید API هوش مصنوعی</string>
+    <string name="st_ai_offline">آفلاین — بدون نیاز به کلید</string>
+    <string name="st_bazaar_rsa">کلید عمومی RSA کافه‌بازار</string>
+    <string name="st_bazaar_hint">از پنل کافه‌بازار، بخش پرداخت درون‌برنامه‌ای (اختیاری — برای امنیت بیشتر)</string>
+    <string name="st_reminder_section">یادآور روزانه</string>
+    <string name="st_reminder">یادآوری وظایف روزانه</string>
+    <string name="st_reminder_desc">هر روز یک نوتیفیکیشن دوستانه یادتان می‌آورد وظایف امروز را انجام دهید.</string>
+    <string name="st_notif_permission">برای نمایش یادآور، اجازه نوتیفیکیشن لازم است.</string>
+    <string name="st_about">درباره</string>
+    <string name="st_version">نسخه</string>
+    <string name="st_saved">ذخیره شد ✓</string>
+    <string name="st_lang_note">زبان برنامه از زبان سیستم گوشی پیروی می‌کند (اندروید ۱۳+: تنظیمات زبان هر اپ).</string>
+
+    <!-- نوتیفیکیشن -->
+    <string name="notif_channel_name">یادآور روزانه</string>
+    <string name="notif_title">وقت رشد کانال است! 🚀</string>
+    <string name="notif_text">وظایف امروزت در یوتیوب‌یار منتظر توست — ۵ دقیقه کافی است.</string>
+
+    <!-- پرده پرمیوم -->
+    <string name="gate_title">این قابلیت ویژه است</string>
+    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا ۲۴ ساعت رایگان باز کنید.</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- مستطیل گرد قرمز یوتیوبی -->
+    <path
+        android:fillColor="#E62C2C"
+        android:pathData="M30,36 h48 a8,8 0 0 1 8,8 v20 a8,8 0 0 1 -8,8 h-48 a8,8 0 0 1 -8,-8 v-20 a8,8 0 0 1 8,-8 z" />
+
+    <!-- مثلث پخش سفید -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,46 L64,54 L48,62 Z" />
+
+    <!-- فلش رشد سبز کوچک (نماد رشد کانال) -->
+    <path
+        android:strokeColor="#7ED957"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M30,80 L38,72 L45,77 L56,65" />
+    <path
+        android:fillColor="#7ED957"
+        android:pathData="M57,63 L58.5,69.5 L51.5,66.5 Z" />
+</vector>

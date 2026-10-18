@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="window_bg">#0E0E11</color>
+    <color name="red_primary">#E62C2C</color>
+    <color name="launcher_bg">#1A1A1F</color>
+
+    <style name="Theme.YouTubeYar" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_bg</item>
+        <item name="android:statusBarColor">#0E0E11</item>
+    </style>
+</resources>
