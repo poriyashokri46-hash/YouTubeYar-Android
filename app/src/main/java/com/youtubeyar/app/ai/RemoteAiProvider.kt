@@ -1,5 +1,7 @@
 package com.youtubeyar.app.ai
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,16 +30,27 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
 
     suspend fun generate(provider: String, apiKey: String, prompt: String): Result<String> {
         if (apiKey.isBlank()) return Result.failure(IllegalStateException("NO_KEY"))
-        return try {
-            val text = when (provider) {
-                "gemini" -> callGemini(apiKey, prompt)
-                "openai" -> callOpenAiCompatible("https://api.openai.com/v1/chat/completions", apiKey, "gpt-4o-mini", prompt)
-                "deepseek" -> callOpenAiCompatible("https://api.deepseek.com/chat/completions", apiKey, "deepseek-chat", prompt)
-                else -> return Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
+        if (prompt.isBlank()) return Result.failure(IllegalArgumentException("EMPTY_PROMPT"))
+        if (provider !in setOf("gemini", "openai", "deepseek")) {
+            return Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
+        }
+
+        // OkHttp execute() is blocking; never perform it on the caller/UI dispatcher.
+        return withContext(Dispatchers.IO) {
+            try {
+                val text = when (provider) {
+                    "gemini" -> callGemini(apiKey, prompt)
+                    "openai" -> callOpenAiCompatible("https://api.openai.com/v1/chat/completions", apiKey, "gpt-4o-mini", prompt)
+                    "deepseek" -> callOpenAiCompatible("https://api.deepseek.com/chat/completions", apiKey, "deepseek-chat", prompt)
+                    else -> error("UNREACHABLE_PROVIDER")
+                }
+                if (text.isBlank()) Result.failure(IllegalStateException("EMPTY_RESPONSE"))
+                else Result.success(text.trim())
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-            Result.success(text)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
@@ -51,7 +64,7 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
             .build()
         client.newCall(request).execute().use { resp ->
             val json = JSONObject(resp.body?.string().orEmpty())
-            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}: ${json.optJSONObject("error")?.optString("message")}")
+            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}")
             return json.getJSONArray("candidates").getJSONObject(0)
                 .getJSONObject("content").getJSONArray("parts").getJSONObject(0)
                 .getString("text")
@@ -72,7 +85,7 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
             .build()
         client.newCall(request).execute().use { resp ->
             val json = JSONObject(resp.body?.string().orEmpty())
-            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}: ${json.optJSONObject("error")?.optString("message")}")
+            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}")
             return json.getJSONArray("choices").getJSONObject(0)
                 .getJSONObject("message").getString("content")
         }
