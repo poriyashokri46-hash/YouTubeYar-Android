@@ -87,6 +87,7 @@ object OfflineAiEngine {
 
     /** امتیاز سئوی یک عنوان از ۰ تا ۱۰ */
     fun seoScore(title: String): Int {
+        if (title.isBlank()) return 1
         var score = 4
         val len = title.length
         if (len in 25..60) score += 2 else if (len in 18..70) score += 1 else if (len > 75) score -= 2
@@ -148,7 +149,7 @@ object OfflineAiEngine {
 
     private fun faTags(topic: String, niche: String): List<String> {
         val kw = keywords(topic).ifEmpty { listOf(topic) }
-        val year = "۲۰۲۵"
+        val year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR).toString()
         val tags = linkedSetOf<String>()
         tags.add(topic)
         tags.add("آموزش $topic")
