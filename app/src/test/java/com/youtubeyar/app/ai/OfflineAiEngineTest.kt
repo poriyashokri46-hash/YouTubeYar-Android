@@ -27,7 +27,8 @@ class OfflineAiEngineTest {
     @Test
     fun seoScoreIsDeterministicForSameInput() {
         val title = "بهترین ۵ روش برای رشد کانال یوتیوب؟"
-        assertEquals(OfflineAiEngine.seoScore(title), OfflineAiEngine.seoScore(title))
+        assertEquals(10, OfflineAiEngine.seoScore(title))
+        assertEquals(1, OfflineAiEngine.seoScore(""))
     }
 
     @Test
