@@ -106,8 +106,11 @@ class IabHelper(private val context: Context, private val marketPackage: String)
     /** لیست خریدها/اشتراک‌های فعال کاربر */
     fun getPurchases(type: String = "subs"): List<PurchaseInfo> {
         val out = mutableListOf<PurchaseInfo>()
-        val response = service?.getPurchases(3, context.packageName, type, null) ?: return out
-        if (response.getInt("RESPONSE_CODE") != 0) return out
+        val response = service?.getPurchases(3, context.packageName, type, null)
+            ?: throw IllegalStateException("BILLING_SERVICE_UNAVAILABLE")
+        if (response.getInt("RESPONSE_CODE") != 0) {
+            throw IllegalStateException("PURCHASE_QUERY_FAILED_${response.getInt("RESPONSE_CODE")}")
+        }
         val dataList = response.getStringArrayList("INAPP_PURCHASE_DATA_LIST")
             ?: response.getStringArrayList("INAPP_PURCHASE_DATA")?.let { arrayListOf(it) }
             ?: return out
