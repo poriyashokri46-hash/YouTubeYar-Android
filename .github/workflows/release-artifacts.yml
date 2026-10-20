@@ -47,6 +47,27 @@ jobs:
           keytool -list -keystore "$ANDROID_KEYSTORE_FILE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
           echo "ANDROID_KEYSTORE_FILE=$ANDROID_KEYSTORE_FILE" >> "$GITHUB_ENV"
 
+      - name: Validate monetization configuration
+        env:
+          TAPSELL_APP_KEY: ${{ secrets.TAPSELL_APP_KEY }}
+          BAZAAR_RSA_PUBLIC_KEY: ${{ secrets.BAZAAR_RSA_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${TAPSELL_APP_KEY//[[:space:]]/}" ]]; then
+            echo "::error::TAPSELL_APP_KEY is missing; release ads would be disabled."
+            exit 1
+          fi
+          key_payload="$(printf '%s' "$BAZAAR_RSA_PUBLIC_KEY" | sed -e 's/-----BEGIN PUBLIC KEY-----//g' -e 's/-----END PUBLIC KEY-----//g' | tr -d '[:space:]')"
+          if [[ -z "$key_payload" ]]; then
+            echo "::error::BAZAAR_RSA_PUBLIC_KEY is missing; VIP purchase verification would fail."
+            exit 1
+          fi
+          printf '%s' "$key_payload" | base64 --decode > "$RUNNER_TEMP/bazaar-public-key.der"
+          if ! openssl pkey -pubin -inform DER -in "$RUNNER_TEMP/bazaar-public-key.der" -noout >/dev/null 2>&1; then
+            echo "::error::BAZAAR_RSA_PUBLIC_KEY is not a valid public key."
+            exit 1
+          fi
+
       - name: Run unit tests
         run: ./gradlew --no-daemon testDebugUnitTest
 
