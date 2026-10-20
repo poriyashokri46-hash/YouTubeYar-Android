@@ -378,7 +378,7 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
             }
         }
 
-        if (!premium) TapsellBanner()
+        item { if (!premium) TapsellBanner() }
     }
 }
 
