@@ -29,7 +29,12 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
             runCatching {
                 val candidate = if (rawInput.startsWith("http://", true) || rawInput.startsWith("https://", true))
                     rawInput else "https://$rawInput"
-                URI(candidate).path.orEmpty()
+                val uri = URI(candidate)
+                val host = uri.host.orEmpty().lowercase(Locale.ROOT)
+                require(host == "youtube.com" || host == "www.youtube.com" || host == "m.youtube.com") {
+                    "INVALID_CHANNEL_URL"
+                }
+                uri.path.orEmpty()
             }.getOrElse { return Result.failure(IllegalArgumentException("INVALID_CHANNEL_URL")) }
         } else rawInput
 
