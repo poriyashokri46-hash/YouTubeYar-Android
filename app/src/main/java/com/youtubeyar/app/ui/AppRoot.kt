@@ -29,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.youtubeyar.app.ads.TapsellAdsManager
+import com.youtubeyar.app.billing.BillingManager
 import com.youtubeyar.app.data.AppSettings
 import com.youtubeyar.app.data.SettingsRepository
 import kotlinx.coroutines.launch
@@ -47,9 +48,15 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    val adsManager: TapsellAdsManager
+    val adsManager: TapsellAdsManager,
+    private val billingManager: BillingManager
 ) : ViewModel() {
     val settings = settingsRepository.settings
+
+    init {
+        // Reconcile cached premium state with the store's current, signature-verified purchases.
+        billingManager.restorePurchases { _, _ -> }
+    }
 
     fun saveOnboarding(name: String, handle: String, niche: String) {
         viewModelScope.launch {
