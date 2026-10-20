@@ -156,7 +156,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val s = current()
         if (s.isPremium()) return Int.MAX_VALUE
         val count = if (s.aiUsedDate == today()) s.aiUsedToday else 0
-        return (FREE_DAILY_LIMIT - count).coerceAtLeast(0)
+        return (FREE_DAILY_LIMIT - count).coerceAtLeast(0) + s.rewardedAiUses
     }
 
     suspend fun setDailyState(date: String, state: List<Boolean>) =
