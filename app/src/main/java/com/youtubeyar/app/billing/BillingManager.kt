@@ -94,22 +94,27 @@ class BillingManager @Inject constructor(
             onResult(false, "INVALID_PRODUCT")
             return
         }
-        scope.launch {
-            val publicKey = runCatching { settings.current().bazaarRsa }.getOrDefault("")
-            if (publicKey.isBlank()) {
-                onResult(false, "RSA_KEY_MISSING")
-                return@launch
-            }
-            beginPurchase(activity, sku, onResult)
-        }
-    }
-
-    private fun beginPurchase(activity: Activity, sku: String, onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
             onResult(false, "NO_MARKET")
             return
         }
+        scope.launch {
+            val storeSettings = runCatching { settings.current() }.getOrNull()
+            val publicKey = when (market) {
+                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa.orEmpty()
+                MYKET_PACKAGE -> storeSettings?.myketRsa.orEmpty()
+                else -> ""
+            }
+            if (publicKey.isBlank()) {
+                onResult(false, "RSA_KEY_MISSING")
+                return@launch
+            }
+            beginPurchase(activity, sku, market, onResult)
+        }
+    }
+
+    private fun beginPurchase(activity: Activity, sku: String, market: String, onResult: (Boolean, String) -> Unit) {
         pendingHelper?.unbind()
         pendingHelper = null
         pendingSku = sku
@@ -194,7 +199,12 @@ class BillingManager @Inject constructor(
             override fun onReady(service: com.android.vending.billing.IInAppBillingService) {
                 scope.launch {
                     try {
-                        val publicKey = settings.current().bazaarRsa
+                        val storeSettings = settings.current()
+                        val publicKey = when (market) {
+                            BAZAAR_PACKAGE -> storeSettings.bazaarRsa
+                            MYKET_PACKAGE -> storeSettings.myketRsa
+                            else -> ""
+                        }
                         if (publicKey.isBlank()) {
                             settings.setPremium(false)
                             onResult(false, "RSA_KEY_MISSING")
