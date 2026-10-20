@@ -46,6 +46,7 @@ import com.youtubeyar.app.R
 import com.youtubeyar.app.ui.MainViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(mainViewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
