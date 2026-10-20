@@ -94,6 +94,17 @@ class BillingManager @Inject constructor(
             onResult(false, "INVALID_PRODUCT")
             return
         }
+        scope.launch {
+            val publicKey = runCatching { settings.current().bazaarRsa }.getOrDefault("")
+            if (publicKey.isBlank()) {
+                onResult(false, "RSA_KEY_MISSING")
+                return@launch
+            }
+            beginPurchase(activity, sku, onResult)
+        }
+    }
+
+    private fun beginPurchase(activity: Activity, sku: String, onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
             onResult(false, "NO_MARKET")
