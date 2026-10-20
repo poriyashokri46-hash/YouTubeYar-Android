@@ -174,6 +174,7 @@ class BillingManager @Inject constructor(
     fun restorePurchases(onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
+            scope.launch { settings.setPremium(false) }
             onResult(false, "NO_MARKET")
             return
         }
@@ -184,6 +185,7 @@ class BillingManager @Inject constructor(
                     try {
                         val publicKey = settings.current().bazaarRsa
                         if (publicKey.isBlank()) {
+                            settings.setPremium(false)
                             onResult(false, "RSA_KEY_MISSING")
                             return@launch
                         }
