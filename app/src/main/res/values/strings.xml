@@ -203,8 +203,8 @@
     <string name="pr_buy">خرید اشتراک</string>
     <string name="pr_restore">بازیابی خرید</string>
     <string name="pr_rewarded_title">پول ندارید؟ مشکل نیست!</string>
-    <string name="pr_rewarded_desc">یک ویدیوی تبلیغاتی تماشا کنید و ۲۴ ساعت دسترسی ویژه رایگان بگیرید.</string>
-    <string name="pr_watch_ad">۲۴ ساعت ویژه رایگان</string>
+    <string name="pr_rewarded_desc">یک تبلیغ را کامل تماشا کنید و ۲ بار استفاده از ابزارهای هوش مصنوعی دریافت کنید.</string>
+    <string name="pr_watch_ad">۲ استفاده رایگان با تبلیغ</string>
     <string name="pr_store_missing">هیچ فروشگاهی (کافه‌بازار یا مایکت) روی گوشی نصب نیست. ابتدا یکی را نصب کنید.</string>
     <string name="pr_price_unavailable">قیمت از فروشگاه دریافت نشد</string>
     <string name="pr_thanks">خرید شما ثبت شد. از حمایت شما سپاسگزاریم! ❤️</string>
@@ -255,5 +255,5 @@
 
     <!-- پرده پرمیوم -->
     <string name="gate_title">این قابلیت ویژه است</string>
-    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا ۲۴ ساعت رایگان باز کنید.</string>
+    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا با تماشای تبلیغ، ۲ استفاده اضافه بگیرید.</string>
 </resources>
