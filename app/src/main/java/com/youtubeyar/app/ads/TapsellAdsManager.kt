@@ -115,6 +115,8 @@ class TapsellAdsManager @Inject constructor(
      * show an interstitial on the 3rd free success and an instant video on the 6th.
      */
     fun recordSuccessfulAiGeneration(activity: Activity, premium: Boolean) {
+        // Begin loading early so the first scheduled interstitial can actually be shown.
+        if (!premium && interstitialAdId.isNullOrBlank()) preloadInterstitial()
         val adType = synchronized(this) {
             if (premium) {
                 null
