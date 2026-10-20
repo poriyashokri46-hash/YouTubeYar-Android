@@ -40,6 +40,7 @@ import com.youtubeyar.app.ui.screens.ChecklistScreen
 import com.youtubeyar.app.ui.screens.DashboardScreen
 import com.youtubeyar.app.ui.screens.OnboardingScreen
 import com.youtubeyar.app.ui.screens.PremiumScreen
+import com.youtubeyar.app.ui.screens.PrivacyPolicyScreen
 import com.youtubeyar.app.ui.screens.SettingsScreen
 import com.youtubeyar.app.ui.theme.YouTubeYarTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,6 +79,7 @@ object Routes {
     const val ACADEMY = "academy"
     const val PREMIUM = "premium"
     const val SETTINGS = "settings"
+    const val PRIVACY = "privacy"
 }
 
 data class BottomItem(val route: String, val icon: ImageVector, val labelRes: Int)
@@ -159,6 +161,7 @@ private fun MainScaffold(mainViewModel: MainViewModel) {
             composable(Routes.ACADEMY) { AcademyScreen(navController) }
             composable(Routes.PREMIUM) { PremiumScreen(navController, mainViewModel) }
             composable(Routes.SETTINGS) { SettingsScreen(navController) }
+            composable(Routes.PRIVACY) { PrivacyPolicyScreen(navController) }
         }
     }
 }
