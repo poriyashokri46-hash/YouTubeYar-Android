@@ -34,10 +34,14 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
         } else rawInput
 
         val path = pathOrInput.trim().trim('/')
+        if (looksLikeUrl && path.startsWith("c/")) {
+            return Result.failure(IllegalArgumentException("UNSUPPORTED_CHANNEL_URL"))
+        }
+        val isUsernameUrl = looksLikeUrl && path.startsWith("user/")
         val input = when {
             path.startsWith("channel/") -> path.removePrefix("channel/").substringBefore('/')
             path.startsWith("@") -> path.removePrefix("@").substringBefore('/')
-            path.startsWith("c/") || path.startsWith("user/") -> path.substringAfter('/').substringBefore('/')
+            path.startsWith("user/") -> path.removePrefix("user/").substringBefore('/')
             else -> path.substringBefore('/')
         }.removePrefix("@").trim()
             .takeIf { it.isNotBlank() }
@@ -48,8 +52,9 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
         val channelResp = try {
             service.channels(
                 parts = "snippet,statistics,contentDetails",
-                forHandle = if (isChannelId) null else "@$input",
+                forHandle = if (isChannelId || isUsernameUrl) null else "@$input",
                 id = if (isChannelId) input else null,
+                forUsername = if (isUsernameUrl) input else null,
                 key = apiKey
             )
         } catch (e: Exception) {
