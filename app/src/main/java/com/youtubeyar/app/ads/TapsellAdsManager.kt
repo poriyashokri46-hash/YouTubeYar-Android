@@ -5,7 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
-import android.widget.FrameLayout
+import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -186,11 +186,13 @@ fun TapsellBanner(modifier: Modifier = Modifier) {
     val zone = stringResource(R.string.tapsell_zone_banner).trim()
     if (activity == null || appKey.isBlank() || zone.isBlank()) return
 
-    val bannerView = remember(activity, zone) { TapsellBannerView(activity, null) }
+    val bannerView = remember(activity, zone) {
+        LayoutInflater.from(activity).inflate(R.layout.tapsell_banner, null, false) as TapsellBannerView
+    }
     DisposableEffect(bannerView, appKey, zone) {
         val application = activity.application
         Tapsell.initialize(application, appKey)
-        bannerView.setEventListener(object : TapsellBannerViewEventListener {
+        bannerView.setEventListener(object : TapsellBannerViewEventListener() {
             override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
             override fun onNoNetwork() { bannerView.visibility = View.GONE }
             override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
