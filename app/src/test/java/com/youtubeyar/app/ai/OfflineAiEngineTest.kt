@@ -1,5 +1,6 @@
 package com.youtubeyar.app.ai
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -12,6 +13,7 @@ class OfflineAiEngineTest {
         listOf("", "عنوان کوتاه", "x".repeat(200), "آموزش حرفه‌ای 2026؟").forEach { title ->
             assertTrue(OfflineAiEngine.seoScore(title) in 1..10)
         }
+        assertEquals(8, OfflineAiEngine.seoScore("A practical guide for beginners", isEnglish = true))
     }
 
     @Test
