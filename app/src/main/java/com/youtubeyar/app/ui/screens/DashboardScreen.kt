@@ -1,5 +1,7 @@
 package com.youtubeyar.app.ui.screens
 
+import com.youtubeyar.app.ads.TapsellBanner
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -146,6 +148,7 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item { if (!premium) TapsellBanner() }
             /* ---------- دو حلقه پیشرفت ---------- */
             item {
                 SectionCard {
