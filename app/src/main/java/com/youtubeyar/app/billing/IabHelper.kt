@@ -112,7 +112,7 @@ class IabHelper(private val context: Context, private val marketPackage: String)
             throw IllegalStateException("PURCHASE_QUERY_FAILED_${response.getInt("RESPONSE_CODE")}")
         }
         val dataList = response.getStringArrayList("INAPP_PURCHASE_DATA_LIST")
-            ?: response.getStringArrayList("INAPP_PURCHASE_DATA")?.let { arrayListOf(it) }
+            ?: response.getString("INAPP_PURCHASE_DATA")?.let { arrayListOf(it) }
             ?: return out
         val signatures = response.getStringArrayList("INAPP_DATA_SIGNATURE_LIST").orEmpty()
         dataList.forEachIndexed { index, json ->
