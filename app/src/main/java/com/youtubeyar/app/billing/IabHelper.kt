@@ -111,10 +111,12 @@ class IabHelper(private val context: Context, private val marketPackage: String)
         if (response.getInt("RESPONSE_CODE") != 0) {
             throw IllegalStateException("PURCHASE_QUERY_FAILED_${response.getInt("RESPONSE_CODE")}")
         }
-        val dataList = response.getStringArrayList("INAPP_PURCHASE_DATA_LIST")
-            ?: response.getString("INAPP_PURCHASE_DATA")?.let { arrayListOf(it) }
+        val dataList = (response.get("INAPP_PURCHASE_DATA_LIST") as? ArrayList<*>)
+            ?.mapNotNull { it as? String }
+            ?: (response.get("INAPP_PURCHASE_DATA") as? String)?.let { listOf(it) }
             ?: return out
-        val signatures = response.getStringArrayList("INAPP_DATA_SIGNATURE_LIST").orEmpty()
+        val signatures = (response.get("INAPP_DATA_SIGNATURE_LIST") as? ArrayList<*>)
+            ?.mapNotNull { it as? String }.orEmpty()
         dataList.forEachIndexed { index, json ->
             try {
                 val o = JSONObject(json)
