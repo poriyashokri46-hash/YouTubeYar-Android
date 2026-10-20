@@ -29,29 +29,54 @@ val generateLauncherIconResources by tasks.registering {
     outputs.dir(launcherResourcesDir)
     doLast {
         val outputRoot = launcherResourcesDir.get().asFile
-        val fullTarget = File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
-        val roundTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_round.jpg")
-        val adaptiveTarget = File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
+        val fullTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_approved.jpg")
+        val roundTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_approved_round.jpg")
+        val adaptiveTarget = File(outputRoot, "drawable-nodpi/ic_launcher_approved_artwork.jpg")
         fullTarget.parentFile.mkdirs()
         adaptiveTarget.parentFile.mkdirs()
         val imageBytes = Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
         fullTarget.writeBytes(imageBytes)
         roundTarget.writeBytes(imageBytes)
 
-        // Adaptive icons are masked by Android. Scale the artwork into the central safe zone.
         val source = ImageIO.read(ByteArrayInputStream(imageBytes))
+        val interpolation = RenderingHints.VALUE_INTERPOLATION_BICUBIC
+        val densitySizes = linkedMapOf("mdpi" to 48, "hdpi" to 72, "xhdpi" to 96, "xxhdpi" to 144, "xxxhdpi" to 192)
+        densitySizes.forEach { (density, size) ->
+            val densityDir = File(outputRoot, "mipmap-$density")
+            densityDir.mkdirs()
+            val resized = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
+            val graphics = resized.createGraphics()
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation)
+            graphics.drawImage(source, 0, 0, size, size, null)
+            graphics.dispose()
+            ImageIO.write(resized, "png", File(densityDir, "ic_launcher_approved.png"))
+            ImageIO.write(resized, "png", File(densityDir, "ic_launcher_approved_round.png"))
+        }
+
+        // Keep the complete artwork inside Android's adaptive-icon safe zone.
         val safeSize = 128
         val canvas = BufferedImage(192, 192, BufferedImage.TYPE_INT_RGB)
         val graphics = canvas.createGraphics()
         graphics.color = Color.BLACK
         graphics.fillRect(0, 0, 192, 192)
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation)
         graphics.drawImage(source, (192 - safeSize) / 2, (192 - safeSize) / 2, safeSize, safeSize, null)
         graphics.dispose()
         ImageIO.write(canvas, "jpg", adaptiveTarget)
+
+        val adaptiveXml = listOf(
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+            "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">",
+            "    <background android:drawable=\"@color/launcher_icon_black\" />",
+            "    <foreground android:drawable=\"@drawable/ic_launcher_approved_artwork\" />",
+            "</adaptive-icon>"
+        ).joinToString("\n")
+        val adaptiveDir = File(outputRoot, "mipmap-anydpi-v26")
+        adaptiveDir.mkdirs()
+        File(adaptiveDir, "ic_launcher_approved.xml").writeText(adaptiveXml)
+        File(adaptiveDir, "ic_launcher_approved_round.xml").writeText(adaptiveXml)
     }
 }
-
 android {
     sourceSets.getByName("main").res.srcDir(launcherResourcesDir)
     namespace = "com.youtubeyar.app"
