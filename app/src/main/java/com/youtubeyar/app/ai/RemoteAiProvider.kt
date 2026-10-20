@@ -47,11 +47,12 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
     }
 
     private suspend fun callGemini(key: String, prompt: String): String {
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=$key"
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent"
         val body = JSONObject().apply {
             put("contents", JSONArray().put(JSONObject().put("parts", JSONArray().put(JSONObject().put("text", prompt)))))
         }
         val request = Request.Builder().url(url)
+            .header("x-goog-api-key", key)
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
         client.newCall(request).execute().use { resp ->
