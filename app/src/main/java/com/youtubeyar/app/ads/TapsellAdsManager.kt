@@ -77,7 +77,7 @@ class TapsellAdsManager @Inject constructor(
     /* ------------------------------ میان‌پرده ------------------------------ */
 
     fun preloadInterstitial() {
-        if (!isConfigured()) return
+        if (!isConfigured() || interstitialZone(context).isBlank()) return
         initIfNeeded()
         try {
             val config = TapsellAdRequestConfiguration(context, interstitialZone(context))
@@ -101,9 +101,16 @@ class TapsellAdsManager @Inject constructor(
     }
 
     fun showInterstitial(activity: Activity) {
+        if (!isConfigured() || interstitialZone(context).isBlank()) return
+        val ad = interstitialReady ?: run {
+            preloadInterstitial()
+            return
+        }
+        interstitialReady = null
         try {
-            interstitialReady?.show(activity, TapsellShowOptions())
+            ad.show(activity, TapsellShowOptions())
         } catch (_: Exception) {
+            preloadInterstitial()
         }
     }
 
@@ -117,30 +124,48 @@ class TapsellAdsManager @Inject constructor(
             onFail("NOT_CONFIGURED")
             return
         }
+        if (rewardedZone(context).isBlank()) {
+            onFail("REWARDED_ZONE_MISSING")
+            return
+        }
         initIfNeeded()
+        var completed = false
+        var adShown = false
+        fun failOnce(message: String) {
+            if (!completed) {
+                completed = true
+                onFail(message)
+            }
+        }
         try {
             val config = TapsellAdRequestConfiguration(context, rewardedZone(context))
             Tapsell.requestAd(config, object : TapsellAdStateListener {
                 override fun onAdRequested() {}
                 override fun onAdFilled(ad: TapsellAd) {
+                    if (completed || adShown) return
+                    adShown = true
                     try {
                         ad.show(activity, TapsellShowOptions())
                     } catch (e: Exception) {
-                        onFail(e.message ?: "SHOW_FAILED")
+                        failOnce(e.message ?: "SHOW_FAILED")
                     }
                 }
-                override fun onAdError(error: TapsellError) = onFail(error.message ?: "AD_ERROR")
-                override fun onAdNotAvailable() = onFail("NO_AD")
+                override fun onAdError(error: TapsellError) = failOnce(error.message ?: "AD_ERROR")
+                override fun onAdNotAvailable() = failOnce("NO_AD")
                 override fun onAdShowed(ad: TapsellAd) {}
                 override fun onAdOpened(ad: TapsellAd) {}
-                override fun onAdClosed(ad: TapsellAd) {}
+                override fun onAdClosed(ad: TapsellAd) {
+                    if (!completed) failOnce("AD_CLOSED_NO_REWARD")
+                }
                 override fun onAdRewarded(ad: TapsellAd, rewards: Map<String, String>) {
+                    if (completed) return
+                    completed = true
                     _rewardGranted.value = true
                     onReward()
                 }
             })
         } catch (e: Exception) {
-            onFail(e.message ?: "REQUEST_FAILED")
+            failOnce(e.message ?: "REQUEST_FAILED")
         }
     }
 }
