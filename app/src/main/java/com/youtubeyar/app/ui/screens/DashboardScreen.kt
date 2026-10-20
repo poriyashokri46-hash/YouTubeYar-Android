@@ -51,7 +51,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
-import com.youtubeyar.app.ads.TapsellBanner
 import com.youtubeyar.app.data.ProgressEntry
 import com.youtubeyar.app.data.RoadmapContent
 import com.youtubeyar.app.data.SettingsRepository
