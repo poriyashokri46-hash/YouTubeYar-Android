@@ -111,7 +111,8 @@ class IabHelper(private val context: Context, private val marketPackage: String)
         val dataList = response.getStringArrayList("INAPP_PURCHASE_DATA_LIST")
             ?: response.getStringArrayList("INAPP_PURCHASE_DATA")?.let { arrayListOf(it) }
             ?: return out
-        for (json in dataList) {
+        val signatures = response.getStringArrayList("INAPP_DATA_SIGNATURE_LIST").orEmpty()
+        dataList.forEachIndexed { index, json ->
             try {
                 val o = JSONObject(json)
                 out += PurchaseInfo(
@@ -120,7 +121,9 @@ class IabHelper(private val context: Context, private val marketPackage: String)
                     packageName = o.optString("packageName"),
                     purchaseTime = o.optLong("purchaseTime"),
                     payload = o.optString("developerPayload"),
-                    autoRenewing = o.optBoolean("autoRenewing", false)
+                    autoRenewing = o.optBoolean("autoRenewing", false),
+                    signature = signatures.getOrNull(index).orEmpty(),
+                    rawData = json
                 )
             } catch (_: Exception) {
             }
@@ -147,7 +150,9 @@ class IabHelper(private val context: Context, private val marketPackage: String)
         val packageName: String,
         val purchaseTime: Long,
         val payload: String,
-        val autoRenewing: Boolean
+        val autoRenewing: Boolean,
+        val signature: String = "",
+        val rawData: String = ""
     )
 
     companion object {
@@ -158,6 +163,7 @@ class IabHelper(private val context: Context, private val marketPackage: String)
             if (code != 0) return null
             return try {
                 val json = data.getStringExtra("INAPP_PURCHASE_DATA") ?: return null
+                val signature = data.getStringExtra("INAPP_DATA_SIGNATURE").orEmpty()
                 val o = JSONObject(json)
                 // Reject cancelled/unpurchased records and malformed purchase payloads.
                 if (o.optInt("purchaseState", -1) != 0) return null
@@ -171,7 +177,9 @@ class IabHelper(private val context: Context, private val marketPackage: String)
                     packageName = packageName,
                     purchaseTime = o.optLong("purchaseTime"),
                     payload = o.optString("developerPayload"),
-                    autoRenewing = o.optBoolean("autoRenewing", false)
+                    autoRenewing = o.optBoolean("autoRenewing", false),
+                    signature = signature,
+                    rawData = json
                 )
             } catch (_: Exception) {
                 null
