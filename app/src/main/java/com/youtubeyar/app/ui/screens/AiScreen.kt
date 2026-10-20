@@ -141,10 +141,14 @@ class AiViewModel @Inject constructor(
                 var result: AiResult? = null
 
                 if (s.aiProvider != "offline" && s.aiApiKey.isNotBlank()) {
-                    val remoteResult = runCatching {
+                    val remoteResult = try {
                         val prompt = remote.buildPrompt(tool, topic, niche, tone)
                         remote.generate(s.aiProvider, s.aiApiKey, prompt)
-                    }.getOrElse { Result.failure(it) }
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Result.failure(error)
+                    }
 
                     remoteResult.fold(
                         onSuccess = { text ->
