@@ -63,7 +63,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.ads.TapsellAdsManager
-import com.youtubeyar.app.ads.TapsellBanner
 import com.youtubeyar.app.data.AiHistory
 import com.youtubeyar.app.ai.AiResult
 import com.youtubeyar.app.ai.AiSection
@@ -190,12 +189,6 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
         ToolUi(AiTool.IDEAS, Icons.Filled.Lightbulb)
     )
 
-    // Interstitials are rate-limited by the ads manager and never interrupt every generation.
-    LaunchedEffect(premium) {
-        vm.generationCompleted.collect {
-            (context as? Activity)?.let { vm.adsManager.recordSuccessfulAiGeneration(it, premium) }
-        }
-    }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TopAppBar(
