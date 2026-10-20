@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">یوتیوب‌یار</string>
-    <!-- Public RSA key injected by release CI; used to verify Bazaar purchase signatures. -->
-    <string name="bazaar_rsa_public_key" translatable="false"></string>
+    <!-- The public RSA key is generated from the BAZAAR_RSA_PUBLIC_KEY build secret. -->
 
     <!-- App key is injected at build time from the TAPSELL_APP_KEY Actions secret. -->
     <!-- Zone IDs are the user's current registered Tapsell zones. -->
