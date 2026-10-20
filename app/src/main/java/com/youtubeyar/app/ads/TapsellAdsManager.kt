@@ -59,27 +59,33 @@ class TapsellAdsManager @Inject constructor(
 
     fun preloadInterstitial() {
         val zone = interstitialZone()
-        if (!isConfigured() || zone.isBlank() || interstitialRequestInFlight) return
+        if (!isConfigured() || zone.isBlank() || interstitialRequestInFlight || !interstitialAdId.isNullOrBlank()) return
         initIfNeeded()
         interstitialRequestInFlight = true
-        Tapsell.requestAd(
-            context,
-            zone,
-            TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener() {
-                override fun onAdAvailable(adId: String) {
-                    interstitialAdId = adId
-                    interstitialZoneId = zone
-                    interstitialRequestInFlight = false
-                }
+        try {
+            Tapsell.requestAd(
+                context,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        interstitialAdId = adId
+                        interstitialZoneId = zone
+                        interstitialRequestInFlight = false
+                    }
 
-                override fun onError(message: String) {
-                    interstitialRequestInFlight = false
-                    interstitialAdId = null
-                    interstitialZoneId = null
+                    override fun onError(message: String) {
+                        interstitialRequestInFlight = false
+                        interstitialAdId = null
+                        interstitialZoneId = null
+                    }
                 }
-            }
-        )
+            )
+        } catch (_: Exception) {
+            interstitialRequestInFlight = false
+            interstitialAdId = null
+            interstitialZoneId = null
+        }
     }
 
     fun showInterstitial(activity: Activity) {
