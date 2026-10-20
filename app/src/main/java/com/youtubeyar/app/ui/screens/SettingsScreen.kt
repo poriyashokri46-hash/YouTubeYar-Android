@@ -250,7 +250,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             SectionCard(title = stringResource(R.string.st_about)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(stringResource(R.string.st_version), style = MaterialTheme.typography.bodyMedium)
-                    Text("2.0.0", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(com.youtubeyar.app.BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
