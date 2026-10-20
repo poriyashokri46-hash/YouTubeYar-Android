@@ -207,6 +207,8 @@
     <string name="pr_restore_none">خرید فعالی پیدا نشد.</string>
     <string name="pr_restore_ok">اشتراک شما بازیابی شد ✓</string>
     <string name="pr_error">خطا در پرداخت: %1$s</string>
+    <string name="pr_ads_not_configured">تبلیغات جایزه‌ای هنوز تنظیم نشده‌اند. کلید اپلیکیشن و زون جایزه‌ای تپسل باید در تنظیمات انتشار وارد شوند.</string>
+    <string name="pr_no_ad_available">در حال حاضر تبلیغ جایزه‌ای در دسترس نیست. کمی بعد دوباره تلاش کنید.</string>
     <string name="pr_rsa_missing">برای خرید امن، ابتدا کلید عمومی RSA را از پنل فروشگاه دریافت و در تنظیمات وارد کنید.</string>
     <string name="pr_signature_invalid">امضای خرید تأیید نشد؛ اشتراک فعال نشده است. کلید عمومی فروشگاه را بررسی کنید.</string>
     <string name="pr_purchase_invalid">اطلاعات خرید معتبر نیست؛ هیچ اشتراکی فعال نشده است.</string>
