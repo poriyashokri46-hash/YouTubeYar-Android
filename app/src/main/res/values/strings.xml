@@ -142,7 +142,7 @@
     <string name="ai_copy_all">کپی همه</string>
     <string name="ai_history">تاریخچه</string>
     <string name="ai_clear">پاک‌سازی</string>
-    <string name="ai_offline_badge">آفلاین</string>
+    <string name="ai_offline_badge">آفلاین · الگو-محور</string>
     <string name="ai_remote_badge">آنلاین</string>
     <string name="ai_need_key">برای حالت آنلاین، سرویس و کلید API را در تنظیمات انتخاب کنید. فعلاً موتور آفلاین استفاده می‌شود.</string>
     <string name="ai_limit_left">تولیدهای باقی‌مانده امروز: %1$s</string>
@@ -229,7 +229,7 @@
     <string name="st_yt_key_hint">رایگان از console.cloud.google.com — سرویس YouTube Data API v3 را فعال و کلید بسازید</string>
     <string name="st_ai_provider">سرویس هوش مصنوعی</string>
     <string name="st_ai_key">کلید API هوش مصنوعی</string>
-    <string name="st_ai_offline">آفلاین — بدون نیاز به کلید</string>
+    <string name="st_ai_offline">الگو-محور است، نه مدل زبانی محلی؛ بدون نیاز به کلید API.</string>
     <string name="st_bazaar_rsa">کلید عمومی RSA کافه‌بازار</string>
     <string name="st_bazaar_hint">برای تأیید امن خرید کافه‌بازار، کلید عمومی RSA را از پنل فروشگاه کپی کنید. بدون کلید معتبر، خرید فعال نمی‌شود.</string>
     <string name="st_myket_rsa">کلید عمومی RSA مایکت</string>
