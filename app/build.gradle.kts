@@ -18,6 +18,9 @@ android {
     compileSdk = 36
 
     defaultConfig {
+        // Tapsell's app key is packaged into the client APK, so it is not a server-side secret.
+        // Keep it out of source control and inject it from GitHub Actions for release builds.
+        resValue("string", "tapsell_app_key", System.getenv("TAPSELL_APP_KEY") ?: "")
         applicationId = "com.youtubeyar.app"
         minSdk = 23
         targetSdk = 36
