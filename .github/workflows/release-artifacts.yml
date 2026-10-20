@@ -63,8 +63,9 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon bundleRelease
+          ./gradlew --no-daemon bundleRelease assembleRelease
           test -s app/build/outputs/bundle/release/app-release.aab
+          test -s app/build/outputs/apk/release/app-release.apk
 
       - name: Generate Cafe Bazaar BIN with the official bundle signer
         shell: bash
@@ -96,11 +97,12 @@ jobs:
           fi
           cp "$bin_file" dist/YouTubeYar-1.0.0.bin
           cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-1.0.0.aab
-          (cd dist && sha256sum YouTubeYar-1.0.0.aab YouTubeYar-1.0.0.bin > SHA256SUMS.txt)
-          echo "Release AAB and Bazaar BIN were generated."
+          cp app/build/outputs/apk/release/app-release.apk dist/YouTubeYar-1.0.0.apk
+          (cd dist && sha256sum YouTubeYar-1.0.0.apk YouTubeYar-1.0.0.aab YouTubeYar-1.0.0.bin > SHA256SUMS.txt)
+          echo "Release APK, AAB, and Cafe Bazaar BIN were generated."
 
       - name: Upload Cafe Bazaar release artifacts
-        if: always() && hashFiles('dist/YouTubeYar-1.0.0.aab', 'dist/YouTubeYar-1.0.0.bin') != ''
+        if: always() && hashFiles('dist/YouTubeYar-1.0.0.apk', 'dist/YouTubeYar-1.0.0.aab', 'dist/YouTubeYar-1.0.0.bin') != ''
         uses: actions/upload-artifact@v4
         with:
           name: YouTubeYar-1.0.0-cafe-bazaar
