@@ -3,19 +3,22 @@ package com.youtubeyar.app.billing
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.RemoteException
+import android.util.Base64
 import com.youtubeyar.app.data.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * مدیریت خرید اشتراک ویژه از کافه‌بازار و مایکت.
- * هر دو فروشگاه پروتکل IAB v3 را پشتیبانی می‌کنند؛ پکیج فروشگاه در زمان اجرا تشخیص داده می‌شود.
+ * مدیریت اشتراک فروشگاهی. فعال‌سازی محلی فقط پس از اعتبارسنجی امضای خرید انجام می‌شود.
+ * کلید عمومی فروشگاه باید در تنظیمات وارد شود؛ بدون آن خرید به‌صورت ناامن پذیرفته نمی‌شود.
  */
 @Singleton
 class BillingManager @Inject constructor(
@@ -32,13 +35,11 @@ class BillingManager @Inject constructor(
         const val TYPE_SUBS = "subs"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var pendingHelper: IabHelper? = null
     private var pendingSku: String? = null
     private var onPurchaseDone: ((Boolean, String) -> Unit)? = null
 
-    /** تشخیص فروشگاه نصب‌شده روی گوشی کاربر */
     fun detectMarket(): String? = when {
         isInstalled(BAZAAR_PACKAGE) -> BAZAAR_PACKAGE
         isInstalled(MYKET_PACKAGE) -> MYKET_PACKAGE
@@ -52,15 +53,17 @@ class BillingManager @Inject constructor(
     }
 
     private fun isInstalled(pkg: String): Boolean = try {
-        context.packageManager.getPackageInfo(pkg, 0) != null
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            context.packageManager.getPackageInfo(pkg, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(pkg, 0)
+        }
+        true
     } catch (_: Exception) {
         false
     }
 
-    /**
-     * دریافت قیمت اشتراک‌ها از فروشگاه (برای نمایش در صفحه اشتراک).
-     * خروجی: نقشه sku → متن قیمت
-     */
     fun loadPrices(onResult: (Map<String, String>) -> Unit) {
         val market = detectMarket()
         if (market == null) {
@@ -71,105 +74,103 @@ class BillingManager @Inject constructor(
         helper.connect(object : IabHelper.Listener {
             override fun onReady(service: com.android.vending.billing.IInAppBillingService) {
                 val prices = try {
-                    val details = helper.getSkuDetails(ALL_SKUS)
-                    details.associate { it.sku to it.price }
+                    helper.getSkuDetails(ALL_SKUS).associate { it.sku to it.price }
                 } catch (_: Exception) {
                     emptyMap()
                 }
-                onResult(prices)
                 helper.unbind()
+                onResult(prices)
             }
 
             override fun onError(message: String) {
-                onResult(emptyMap())
                 helper.unbind()
+                onResult(emptyMap())
             }
         })
     }
 
-    /**
-     * شروع فرایند خرید اشتراک.
-     * نتیجه در handlePurchaseResult (که MainActivity آن را پاس می‌دهد) دریافت می‌شود.
-     */
     fun startPurchase(activity: Activity, sku: String, onResult: (Boolean, String) -> Unit) {
+        if (sku !in ALL_SKUS) {
+            onResult(false, "INVALID_PRODUCT")
+            return
+        }
         val market = detectMarket()
         if (market == null) {
             onResult(false, "NO_MARKET")
             return
         }
-        onPurchaseDone = onResult
+        pendingHelper?.unbind()
+        pendingHelper = null
         pendingSku = sku
+        onPurchaseDone = onResult
         val helper = IabHelper(context, market)
         pendingHelper = helper
         helper.connect(object : IabHelper.Listener {
             override fun onReady(service: com.android.vending.billing.IInAppBillingService) {
                 try {
                     if (!helper.isBillingSupported(TYPE_SUBS)) {
-                        onResult(false, "SUBS_NOT_SUPPORTED")
-                        helper.unbind()
-                        pendingHelper = null
+                        finishPurchase(false, "SUBS_NOT_SUPPORTED", helper)
                         return
                     }
-                    val payload = "ytt-" + System.currentTimeMillis()
-                    val buyIntent = helper.getBuyIntent(sku, payload, TYPE_SUBS)
+                    val buyIntent = helper.getBuyIntent(sku, "youtubeyar-${System.currentTimeMillis()}", TYPE_SUBS)
                     if (buyIntent == null) {
-                        onResult(false, "BUY_INTENT_FAILED")
-                        helper.unbind()
-                        pendingHelper = null
+                        finishPurchase(false, "BUY_INTENT_FAILED", helper)
                         return
                     }
                     activity.startIntentSenderForResult(
-                        buyIntent.intentSender,
-                        PURCHASE_REQUEST_CODE,
-                        Intent(), 0, 0, 0
+                        buyIntent.intentSender, PURCHASE_REQUEST_CODE, Intent(), 0, 0, 0
                     )
                 } catch (e: Exception) {
-                    onResult(false, e.message ?: "PURCHASE_ERROR")
-                    helper.unbind()
-                    pendingHelper = null
+                    finishPurchase(false, e.message ?: "PURCHASE_ERROR", helper)
                 }
             }
 
             override fun onError(message: String) {
-                onResult(false, message)
-                helper.unbind()
-                pendingHelper = null
+                finishPurchase(false, message, helper)
             }
         })
     }
 
-    /** از MainActivity صدا زده می‌شود بعد از بسته شدن دیالوگ پرداخت */
-    fun handlePurchaseResult(resultCode: Int, data: Intent?) {
-        val helper = pendingHelper ?: return
-        val sku = pendingSku ?: ""
-        var success = false
-        var message = "CANCELLED"
-
-        val purchase = IabHelper.parsePurchaseData(data)
-        if (resultCode == Activity.RESULT_OK && purchase != null &&
-            purchase.packageName == context.packageName &&
-            purchase.sku == sku && ALL_SKUS.contains(purchase.sku) && purchase.token.isNotBlank()) {
-            try {
-                helper.acknowledge(purchase.token)
-            } catch (_: Exception) {
-            }
-            scope.launch {
-                settings.setPremium(true, purchase.token)
-            }
-            success = true
-            message = "OK"
-        }
-
-        onPurchaseDone?.invoke(success, message)
+    private fun finishPurchase(success: Boolean, message: String, helper: IabHelper? = pendingHelper) {
+        helper?.unbind()
+        if (pendingHelper === helper) pendingHelper = null
+        val callback = onPurchaseDone
         onPurchaseDone = null
         pendingSku = null
-        helper.unbind()
-        pendingHelper = null
+        callback?.invoke(success, message)
     }
 
-    /**
-     * بازیابی خریدها — اگر کاربر اشتراک فعال داشته باشد، پرمیوم روشن می‌شود.
-     */
+    fun handlePurchaseResult(resultCode: Int, data: Intent?) {
+        val helper = pendingHelper ?: return
+        val expectedSku = pendingSku.orEmpty()
+        if (resultCode != Activity.RESULT_OK) {
+            finishPurchase(false, "CANCELLED", helper)
+            return
+        }
+        val purchase = IabHelper.parsePurchaseData(data)
+        if (purchase == null || purchase.packageName != context.packageName ||
+            purchase.sku != expectedSku || purchase.sku !in ALL_SKUS || purchase.token.isBlank()) {
+            finishPurchase(false, "INVALID_PURCHASE", helper)
+            return
+        }
+
+        scope.launch {
+            val publicKey = runCatching { settings.current().bazaarRsa }.getOrDefault("")
+            if (publicKey.isBlank()) {
+                finishPurchase(false, "RSA_KEY_MISSING", helper)
+                return@launch
+            }
+            if (!verifyPurchase(purchase.rawData, purchase.signature, publicKey)) {
+                finishPurchase(false, "SIGNATURE_INVALID", helper)
+                return@launch
+            }
+            // Never grant entitlement until a valid store signature has been checked.
+            settings.setPremium(true, purchase.token)
+            runCatching { helper.acknowledge(purchase.token) }
+            finishPurchase(true, "OK", helper)
+        }
+    }
+
     fun restorePurchases(onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
@@ -180,36 +181,60 @@ class BillingManager @Inject constructor(
         helper.connect(object : IabHelper.Listener {
             override fun onReady(service: com.android.vending.billing.IInAppBillingService) {
                 scope.launch {
-                    var found = false
                     try {
-                        val subs = helper.getPurchases(TYPE_SUBS)
-                        found = subs.any { p ->
+                        val publicKey = settings.current().bazaarRsa
+                        if (publicKey.isBlank()) {
+                            onResult(false, "RSA_KEY_MISSING")
+                            return@launch
+                        }
+                        val purchases = helper.getPurchases(TYPE_SUBS)
+                        val valid = purchases.filter { p ->
                             p.packageName == context.packageName &&
-                                p.token.isNotBlank() && ALL_SKUS.contains(p.sku)
+                                p.token.isNotBlank() && p.sku in ALL_SKUS &&
+                                p.rawData.isNotBlank() &&
+                                verifyPurchase(p.rawData, p.signature, publicKey)
                         }
-                        if (found) {
-                            subs.filter {
-                                it.packageName == context.packageName &&
-                                    it.token.isNotBlank() && ALL_SKUS.contains(it.sku)
-                            }.forEach { p ->
-                                runCatching { helper.acknowledge(p.token) }
-                            }
-                            settings.setPremium(true, subs.first {
-                                it.packageName == context.packageName &&
-                                    it.token.isNotBlank() && ALL_SKUS.contains(it.sku)
-                            }.token)
+                        if (valid.isNotEmpty()) {
+                            valid.forEach { runCatching { helper.acknowledge(it.token) } }
+                            settings.setPremium(true, valid.maxByOrNull { it.purchaseTime }!!.token)
+                            onResult(true, "OK")
+                        } else {
+                            // The store's active-subscription query is authoritative for restoration.
+                            settings.setPremium(false)
+                            onResult(false, "NOT_FOUND")
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        onResult(false, e.message ?: "RESTORE_ERROR")
+                    } finally {
+                        helper.unbind()
                     }
-                    onResult(found, if (found) "OK" else "NOT_FOUND")
-                    helper.unbind()
                 }
             }
 
             override fun onError(message: String) {
-                onResult(false, message)
                 helper.unbind()
+                onResult(false, message)
             }
         })
+    }
+
+    private fun verifyPurchase(rawData: String, signatureText: String, encodedPublicKey: String): Boolean {
+        if (rawData.isBlank() || signatureText.isBlank() || encodedPublicKey.isBlank()) return false
+        return try {
+            val keyText = encodedPublicKey
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .filterNot { it.isWhitespace() }
+            val keyBytes = Base64.decode(keyText, Base64.DEFAULT)
+            val signatureBytes = Base64.decode(signatureText, Base64.DEFAULT)
+            val key = KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(keyBytes))
+            Signature.getInstance("SHA1withRSA").run {
+                initVerify(key)
+                update(rawData.toByteArray(Charsets.UTF_8))
+                verify(signatureBytes)
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 }
