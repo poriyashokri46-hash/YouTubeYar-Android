@@ -29,6 +29,12 @@ object OfflineAiEngine {
 
     private fun pick(list: List<String>, rnd: Random): String = list[rnd.nextInt(list.size)]
 
+    private fun hashtag(value: String): String =
+        value.trim()
+            .replace(Regex("\\s+"), "_")
+            .replace(Regex("[^\\p{L}\\p{N}_]"), "")
+            .trim('_')
+
     private val powerWordsFa = listOf(
         "راز", "رایگان", "سریع", "شگفت‌انگیز", "حرفه‌ای", "نابود", "هیچ‌کس", "موفق", "رشد",
         "بهترین", "آسان", "واقعی", "قطعی", "محرمانه", "قطعی"
@@ -124,7 +130,7 @@ object OfflineAiEngine {
             appendLine()
             appendLine("💬 سؤال‌تان درباره $topic را در کامنت‌ها بنویسید.")
             appendLine()
-            appendLine("#$topic #آموزش_$topic #$niche")
+            appendLine("#${hashtag(topic)} #آموزش_${hashtag(topic)} #${hashtag(niche)}")
             appendLine("کلیدواژه‌ها: $topic، $kwLine، آموزش $topic")
         }
     }
@@ -139,7 +145,7 @@ object OfflineAiEngine {
         appendLine("• Free resources to keep learning")
         appendLine()
         appendLine("📌 If this helped, like & subscribe for more $topic videos! 🔔")
-        appendLine("#$topic #$niche")
+        appendLine("#${hashtag(topic)} #${hashtag(niche)}")
     }
 
     /* -------------------------------- تگ‌ها ------------------------------- */
