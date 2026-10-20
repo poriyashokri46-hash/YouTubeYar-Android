@@ -58,6 +58,7 @@ jobs:
         env:
           TAPSELL_APP_KEY: ${{ secrets.TAPSELL_APP_KEY }}
           BAZAAR_RSA_PUBLIC_KEY: ${{ secrets.BAZAAR_RSA_PUBLIC_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/YouTubeYar-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -91,22 +92,22 @@ jobs:
             --ks-pass "env:ANDROID_KEYSTORE_PASSWORD" \
             --ks-key-alias "$ANDROID_KEY_ALIAS" \
             --key-pass "env:ANDROID_KEY_PASSWORD"
-          bin_file="$(find dist -maxdepth 1 -type f -name '*.bin' ! -name 'YouTubeYar-1.0.0.bin' -print -quit)"
+          bin_file="$(find dist -maxdepth 1 -type f -name '*.bin' ! -name 'YouTubeYar-2.0.0.bin' -print -quit)"
           if [[ -z "$bin_file" || ! -s "$bin_file" ]]; then
             echo "The official bundle signer did not produce a BIN file."
             exit 1
           fi
-          cp "$bin_file" dist/YouTubeYar-1.0.0.bin
-          cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-1.0.0.aab
-          cp app/build/outputs/apk/release/app-release.apk dist/YouTubeYar-1.0.0.apk
-          (cd dist && sha256sum YouTubeYar-1.0.0.apk YouTubeYar-1.0.0.aab YouTubeYar-1.0.0.bin > SHA256SUMS.txt)
+          cp "$bin_file" dist/YouTubeYar-2.0.0.bin
+          cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-2.0.0.aab
+          cp app/build/outputs/apk/release/app-release.apk dist/YouTubeYar-2.0.0.apk
+          (cd dist && sha256sum YouTubeYar-2.0.0.apk YouTubeYar-2.0.0.aab YouTubeYar-2.0.0.bin > SHA256SUMS.txt)
           echo "Release APK, AAB, and Cafe Bazaar BIN were generated."
 
       - name: Upload Cafe Bazaar release artifacts
-        if: always() && hashFiles('dist/YouTubeYar-1.0.0.apk', 'dist/YouTubeYar-1.0.0.aab', 'dist/YouTubeYar-1.0.0.bin') != ''
+        if: always() && hashFiles('dist/YouTubeYar-2.0.0.apk', 'dist/YouTubeYar-2.0.0.aab', 'dist/YouTubeYar-2.0.0.bin') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: YouTubeYar-1.0.0-cafe-bazaar
+          name: YouTubeYar-2.0.0-cafe-bazaar
           path: dist/*
           if-no-files-found: error
           retention-days: 14
