@@ -36,8 +36,7 @@ object OfflineAiEngine {
             .trim('_')
 
     private val powerWordsFa = listOf(
-        "راز", "رایگان", "سریع", "شگفت‌انگیز", "حرفه‌ای", "نابود", "هیچ‌کس", "موفق", "رشد",
-        "بهترین", "آسان", "واقعی", "قطعی", "محرمانه", "قطعی"
+        "رایگان", "سریع", "حرفه‌ای", "موفق", "رشد", "بهترین", "آسان", "آموزش", "راهنما", "مرحله‌به‌مرحله"
     )
 
     /* ------------------------------- عنوان‌ها ------------------------------ */
@@ -85,7 +84,7 @@ object OfflineAiEngine {
             "Key concepts to understand about $topic",
             "$topic: classic vs modern, which one wins?",
             "What to review when practicing $topic",
-            "The complete $topic guide for beginners ($niche)"
+            "Beginner’s guide to $topic ($niche)"
         ).shuffled(rnd)
     }
 
@@ -192,7 +191,7 @@ object OfflineAiEngine {
         val sections = mutableListOf<AiSection>()
         sections += AiSection(
             "هوک شروع (0:00 تا 0:15)",
-            hook + "\n\nنکته: نتیجه نهایی را در ۵ ثانیه اول نشان دهید تا مخاطب بداند در پایان چه چیز منتظرش است."
+            hook + "\n\nنکته: اگر نتیجه نهایی قابل نمایش است، پیش‌نمایشی واقعی از آن را در ۵ ثانیه اول نشان دهید."
         )
         sections += AiSection(
             "معرفی کوتاه (0:15 تا 0:40)",
