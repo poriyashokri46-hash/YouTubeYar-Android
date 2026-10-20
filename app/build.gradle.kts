@@ -5,12 +5,13 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
-// Release signing values are supplied only by the CI environment.
+// Release signing values are supplied only by the release-artifacts CI workflow.
 // Never commit keystores or signing passwords to the repository.
 val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_FILE")
 val releaseKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
 val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+val hasReleaseSigning = !releaseKeystorePath.isNullOrBlank()
 
 android {
     namespace = "com.youtubeyar.app"
@@ -27,8 +28,8 @@ android {
 
     signingConfigs {
         create("release") {
-            if (!releaseKeystorePath.isNullOrBlank()) {
-                storeFile = file(releaseKeystorePath)
+            if (hasReleaseSigning) {
+                storeFile = file(releaseKeystorePath!!)
                 storePassword = releaseKeystorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
@@ -38,7 +39,14 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            // PR validation workflows do not receive repository signing secrets.
+            // Use debug signing only for those validation builds; the dedicated
+            // release-artifacts workflow provides the private release keystore.
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -98,17 +106,17 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // Network (YouTube Data API + هوش مصنوعی آنلاین اختیاری)
+    // Network (YouTube Data API + optional online AI)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // WorkManager (یادآور روزانه)
+    // WorkManager (daily reminders)
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-    // Tapsell SDK (تبلیغات) — آخرین نسخه منتشرشده روی Maven Central
+    // Tapsell SDK (ads)
     implementation("ir.tapsell.sdk:tapsell-sdk-android:4.9.16")
 }
