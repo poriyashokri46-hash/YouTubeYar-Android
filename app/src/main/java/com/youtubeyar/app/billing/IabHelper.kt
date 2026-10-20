@@ -126,6 +126,8 @@ class IabHelper(private val context: Context, private val marketPackage: String)
         dataList.forEachIndexed { index, json ->
             try {
                 val o = JSONObject(json)
+                // Ignore pending/cancelled/malformed purchases during restore.
+                if (o.optInt("purchaseState", -1) != 0) return@forEachIndexed
                 out += PurchaseInfo(
                     sku = o.optString("productId"),
                     token = o.optString("purchaseToken"),
