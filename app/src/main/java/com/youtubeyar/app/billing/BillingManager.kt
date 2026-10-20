@@ -195,7 +195,8 @@ class BillingManager @Inject constructor(
     fun restorePurchases(onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
-            scope.launch { settings.setPremium(false) }
+            // A missing store is not proof that a previously verified subscription expired.
+            // Keep the cached entitlement until a successful store query confirms otherwise.
             onResult(false, "NO_MARKET")
             return
         }
@@ -211,7 +212,7 @@ class BillingManager @Inject constructor(
                             else -> ""
                         }
                         if (publicKey.isBlank()) {
-                            settings.setPremium(false)
+                            // Configuration failure is not an authoritative expiry signal.
                             onResult(false, "RSA_KEY_MISSING")
                             return@launch
                         }
@@ -232,9 +233,8 @@ class BillingManager @Inject constructor(
                             onResult(false, "NOT_FOUND")
                         }
                     } catch (e: Exception) {
-                        // Fail closed: a stale cached subscription must not unlock VIP when
-                        // the store cannot verify the current entitlement.
-                        settings.setPremium(false)
+                        // A temporary service/query error is not proof of expiry.
+                        // Preserve the last verified state and let the user retry.
                         onResult(false, e.message ?: "RESTORE_ERROR")
                     } finally {
                         helper.unbind()
@@ -244,7 +244,7 @@ class BillingManager @Inject constructor(
 
             override fun onError(message: String) {
                 helper.unbind()
-                scope.launch { settings.setPremium(false) }
+                // Connection failure must not erase a previously verified subscription.
                 onResult(false, message)
             }
         })
