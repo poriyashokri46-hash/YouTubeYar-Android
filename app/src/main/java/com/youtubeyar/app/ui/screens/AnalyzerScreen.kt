@@ -84,10 +84,20 @@ class AnalyzerViewModel @Inject constructor(
         viewModelScope.launch {
             val key = settingsRepository.current().youtubeApiKey
             if (key.isBlank()) {
-                _state.value = _state.value.copy(loading = false, error = "NO_API_KEY")
+                _state.value = _state.value.copy(
+                    loading = false,
+                    error = "NO_API_KEY",
+                    own = if (isOwn) null else _state.value.own,
+                    competitor = if (isOwn) _state.value.competitor else null
+                )
                 return@launch
             }
-            _state.value = _state.value.copy(loading = true, error = null)
+            _state.value = _state.value.copy(
+                loading = true,
+                error = null,
+                own = if (isOwn) null else _state.value.own,
+                competitor = if (isOwn) _state.value.competitor else null
+            )
             val result = analyzer.analyze(handle, key)
             result.fold(
                 onSuccess = { analysis ->
@@ -112,7 +122,16 @@ fun AnalyzerScreen(navController: NavController, vm: AnalyzerViewModel = hiltVie
     val state by vm.state.collectAsState()
     val settings by vm.settings.collectAsState(initial = null)
     var tab by remember { mutableIntStateOf(0) }
-    var ownInput by remember { mutableStateOf("@${settings?.channelHandle.orEmpty()}") }
+    var ownInput by remember(settings?.channelHandle) {
+        val savedHandle = settings?.channelHandle.orEmpty().trim()
+        mutableStateOf(
+            when {
+                savedHandle.isBlank() -> ""
+                savedHandle.startsWith("@") -> savedHandle
+                else -> "@$savedHandle"
+            }
+        )
+    }
     var competitorInput by remember { mutableStateOf("") }
     val persian = isFaLocale()
 
