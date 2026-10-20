@@ -283,10 +283,17 @@ object OfflineAiEngine {
                 val titles = if (isEnglish) enTitles(topic, niche, rnd) else faTitles(topic, niche, tone, rnd)
                 val scored = titles.map { it to seoScore(it) }.sortedByDescending { it.second }
                 val list = scored.joinToString("\n") { (t, s) -> "[$s/10]  $t" }
-                listOf(
-                    AiSection("عنوان‌های پیشنهادی (مرتب بر اساس امتیاز سئو)", list),
-                    AiSection("تحلیل سئو", "امتیاز بر اساس: طول بهینه (۲۵ تا ۶۰ کاراکتر)، داشتن عدد، کلمات قدرتمند و ساختار سؤالی. عنوان با امتیاز ۸ به بالا را انتخاب کنید و حتماً با وعده ویدیو هم‌خوان باشد.")
-                )
+                if (isEnglish) {
+                    listOf(
+                        AiSection("Suggested titles (heuristic score, not an official YouTube metric)", list),
+                        AiSection("Scoring method", "This simple estimate uses title length, digits, selected descriptive words, and question structure. It does not measure YouTube ranking or predict performance. Pick a title that accurately matches the finished video.")
+                    )
+                } else {
+                    listOf(
+                        AiSection("عنوان‌های پیشنهادی (امتیاز تخمینی و غیررسمی)", list),
+                        AiSection("روش امتیازدهی", "این امتیاز یک تخمین ساده بر اساس طول عنوان، عدد، واژه‌های توصیفی و ساختار پرسشی است؛ معیار رسمی یوتیوب نیست و رتبه یا بازدید را پیش‌بینی نمی‌کند. عنوانی را انتخاب کنید که با محتوای واقعی ویدیو هم‌خوان باشد.")
+                    )
+                }
             }
             AiTool.DESCRIPTION -> if (isEnglish)
                 listOf(AiSection("Description", enDescription(topic, niche)))
