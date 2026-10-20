@@ -30,6 +30,7 @@ data class AppSettings(
     val aiProvider: String = "offline",      // offline / gemini / openai / deepseek
     val aiApiKey: String = "",
     val bazaarRsa: String = "",
+    val myketRsa: String = "",
     val premiumActive: Boolean = false,
     val premiumTempUntil: Long = 0,          // آنلاک موقت ۲۴ ساعته با تماشای تبلیغ جایزه‌ای
     val aiUsedToday: Int = 0,
@@ -57,6 +58,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val AI_PROVIDER = stringPreferencesKey("ai_provider")
         val AI_KEY = stringPreferencesKey("ai_api_key")
         val BAZAAR_RSA = stringPreferencesKey("bazaar_rsa")
+        val MYKET_RSA = stringPreferencesKey("myket_rsa")
         val PREMIUM = booleanPreferencesKey("premium_active")
         val PREMIUM_TOKEN = stringPreferencesKey("premium_token")
         val PREMIUM_TEMP = longPreferencesKey("premium_temp_until")
@@ -80,6 +82,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             aiProvider = p[K.AI_PROVIDER] ?: "offline",
             aiApiKey = p[K.AI_KEY] ?: "",
             bazaarRsa = p[K.BAZAAR_RSA] ?: "",
+            myketRsa = p[K.MYKET_RSA] ?: "",
             premiumActive = p[K.PREMIUM] ?: false,
             premiumTempUntil = p[K.PREMIUM_TEMP] ?: 0,
             aiUsedToday = p[K.AI_USED_COUNT] ?: 0,
@@ -108,6 +111,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     suspend fun setAiProvider(v: String) = context.dataStore.edit { it[K.AI_PROVIDER] = v }
     suspend fun setAiKey(v: String) = context.dataStore.edit { it[K.AI_KEY] = v.trim() }
     suspend fun setBazaarRsa(v: String) = context.dataStore.edit { it[K.BAZAAR_RSA] = v.trim() }
+    suspend fun setMyketRsa(v: String) = context.dataStore.edit { it[K.MYKET_RSA] = v.trim() }
     suspend fun setReminderEnabled(v: Boolean) = context.dataStore.edit { it[K.REMINDER] = v }
 
     suspend fun setPremium(active: Boolean, token: String = "") = context.dataStore.edit {
