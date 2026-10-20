@@ -126,6 +126,7 @@ tasks.configureEach {
     val needsLauncherResources =
         (name.startsWith("generate") && name.endsWith("Resources")) ||
         (name.startsWith("map") && name.endsWith("SourceSetPaths")) ||
+        name.startsWith("extractDeepLinks") ||
         (name.startsWith("merge") && name.endsWith("Resources"))
     if (name != "generateLauncherIconResources" && needsLauncherResources) {
         dependsOn(generateLauncherIconResources)
