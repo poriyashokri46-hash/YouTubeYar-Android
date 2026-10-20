@@ -45,17 +45,17 @@ object OfflineAiEngine {
 
         val base = listOf(
             "$n ترفند $topic که هیچ‌کس به شما نمی‌گوید",
-            "چرا $topic شما جواب نمی‌دهد؟ (راه‌حل واقعی)",
+            "چطور مشکلات رایج در $topic را بررسی کنیم؟",
             "راهنمای مرحله‌به‌مرحله برای یادگیری $topic",
             "$n اشتباه رایج هنگام کار با $topic",
-            "راز $topic که فقط حرفه‌ای‌ها می‌دانند!",
+            "نکته‌های مهم برای پیشرفت در $topic",
             "$topic: روش کلاسیک یا مدرن؟ انتخاب درست",
             "چه چیزهایی هنگام تمرین $topic باید بررسی کنید؟",
             "آموزش کامل $topic از صفر تا صد (مخصوص مبتدی‌ها)",
-            "بهترین روش‌های $topic در سال جدید (آپدیت کامل)",
+            "روش‌های کاربردی برای شروع $topic",
             "$n ابزار و منبع برای شروع کار با $topic",
             "همه‌چیز درباره $kw در یک ویدیو — $niche",
-            "از صفر تا حرفه‌ای در $topic: نقشه راه واقعی"
+            "نقشه راه یادگیری $topic از سطح مقدماتی"
         ).shuffled(rnd)
 
         val decorated = base.take(8).map { title ->
@@ -71,13 +71,12 @@ object OfflineAiEngine {
 
     private fun enTitles(topic: String, niche: String, rnd: Random): List<String> {
         val n = 5 + rnd.nextInt(7)
-        val d = 14 + rnd.nextInt(45)
         return listOf(
-            "$n $topic secrets nobody tells you",
-            "Why your $topic isn't working (the real fix)",
+            "$n useful ideas about $topic",
+            "How to troubleshoot common $topic problems",
             "A step-by-step guide to learning $topic",
             "$n common mistakes beginners make with $topic",
-            "The hidden truth about $topic",
+            "Key concepts to understand about $topic",
             "$topic: classic vs modern, which one wins?",
             "What to review when practicing $topic",
             "The complete $topic guide for beginners ($niche)"
