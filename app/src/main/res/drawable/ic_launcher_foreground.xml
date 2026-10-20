@@ -4,24 +4,20 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-
-    <!-- مستطیل گرد قرمز یوتیوبی -->
+    <!-- YouTubeYar launcher artwork inspired by the supplied red play button and green growth arrow -->
     <path
-        android:fillColor="#E62C2C"
-        android:pathData="M30,36 h48 a8,8 0 0 1 8,8 v20 a8,8 0 0 1 -8,8 h-48 a8,8 0 0 1 -8,-8 v-20 a8,8 0 0 1 8,-8 z" />
-
-    <!-- مثلث پخش سفید -->
+        android:fillColor="#D92722"
+        android:pathData="M24,12 H84 C98,12 106,21 106,36 V72 C106,87 97,96 82,96 H26 C11,96 2,87 2,72 V36 C2,21 11,12 24,12 Z" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M48,46 L64,54 L48,62 Z" />
-
-    <!-- فلش رشد سبز کوچک (نماد رشد کانال) -->
+        android:pathData="M42,34 C40,33 38,35 38,38 V70 C38,73 41,75 44,73 L72,57 C75,55 75,52 72,50 Z" />
     <path
-        android:strokeColor="#7ED957"
-        android:strokeWidth="3.5"
+        android:strokeColor="#79C94A"
+        android:strokeWidth="4"
         android:strokeLineCap="round"
-        android:pathData="M30,80 L38,72 L45,77 L56,65" />
+        android:strokeLineJoin="round"
+        android:pathData="M30,101 L48,77 L61,89 L83,59" />
     <path
-        android:fillColor="#7ED957"
-        android:pathData="M57,63 L58.5,69.5 L51.5,66.5 Z" />
+        android:fillColor="#79C94A"
+        android:pathData="M73,58 L91,51 L88,72 Z" />
 </vector>
