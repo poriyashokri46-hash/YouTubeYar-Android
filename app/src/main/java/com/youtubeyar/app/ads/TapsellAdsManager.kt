@@ -191,7 +191,8 @@ class TapsellAdsManager @Inject constructor(
         initIfNeeded()
         val finished = AtomicBoolean(false)
         val showStarted = AtomicBoolean(false)
-        Tapsell.requestAd(
+        try {
+            Tapsell.requestAd(
             activity,
             zone,
             TapsellAdRequestOptions(),
@@ -233,8 +234,11 @@ class TapsellAdsManager @Inject constructor(
                 override fun onError(message: String) {
                     if (finished.compareAndSet(false, true)) onFail("AD_ERROR")
                 }
-            }
-        )
+                }
+            )
+        } catch (error: Exception) {
+            if (finished.compareAndSet(false, true)) onFail(error.message ?: "AD_ERROR")
+        }
     }
 }
 
