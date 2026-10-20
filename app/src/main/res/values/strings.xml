@@ -218,7 +218,9 @@
     <string name="st_ai_key">کلید API هوش مصنوعی</string>
     <string name="st_ai_offline">آفلاین — بدون نیاز به کلید</string>
     <string name="st_bazaar_rsa">کلید عمومی RSA کافه‌بازار</string>
-    <string name="st_bazaar_hint">برای تأیید امن خرید و بازیابی اشتراک، کلید عمومی RSA را از پنل فروشگاه کپی کنید. بدون کلید معتبر، خرید فعال نمی‌شود.</string>
+    <string name="st_bazaar_hint">برای تأیید امن خرید کافه‌بازار، کلید عمومی RSA را از پنل فروشگاه کپی کنید. بدون کلید معتبر، خرید فعال نمی‌شود.</string>
+    <string name="st_myket_rsa">کلید عمومی RSA مایکت</string>
+    <string name="st_myket_hint">اگر از مایکت خرید می‌کنید، کلید عمومی جداگانه را از پنل مایکت دریافت و اینجا وارد کنید.</string>
     <string name="st_reminder_section">یادآور روزانه</string>
     <string name="st_reminder">یادآوری وظایف روزانه</string>
     <string name="st_reminder_desc">هر روز یک نوتیفیکیشن دوستانه یادتان می‌آورد وظایف امروز را انجام دهید.</string>
