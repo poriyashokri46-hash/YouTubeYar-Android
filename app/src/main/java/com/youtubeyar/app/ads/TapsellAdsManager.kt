@@ -53,8 +53,13 @@ class TapsellAdsManager @Inject constructor(
     fun initIfNeeded() {
         if (initialized || !isConfigured()) return
         val application = context.applicationContext as? Application ?: return
-        Tapsell.initialize(application, appKey())
-        initialized = true
+        try {
+            Tapsell.initialize(application, appKey())
+            initialized = true
+        } catch (_: Exception) {
+            // An unavailable ad SDK must not prevent the rest of the app from working.
+            initialized = false
+        }
     }
 
     fun preloadInterstitial() {
