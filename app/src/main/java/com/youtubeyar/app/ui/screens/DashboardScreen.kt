@@ -308,7 +308,7 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             }
 
             item { Spacer(Modifier.height(2.dp)) }
-            item { if (!premium) TapsellBanner() }
+
         }
     }
 
