@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">یوتیوب‌یار</string>
+    <!-- Public RSA key injected by release CI; used to verify Bazaar purchase signatures. -->
+    <string name="bazaar_rsa_public_key" translatable="false"></string>
 
     <!-- کلیدهای تپسل — این‌ها را از پنل tapsell.ir پر کنید -->
     <!-- App key is injected at build time from the TAPSELL_APP_KEY Actions secret. -->
@@ -196,6 +198,7 @@
     <string name="pr_feature_3">اولویت در ابزارهای آینده</string>
     <string name="pr_feature_4">حمایت از توسعه اپ رایگان</string>
     <string name="pr_month">اشتراک ماهانه</string>
+    <string name="pr_quarter">اشتراک سه‌ماهه</string>
     <string name="pr_year">اشتراک سالانه</string>
     <string name="pr_buy">خرید اشتراک</string>
     <string name="pr_restore">بازیابی خرید</string>
