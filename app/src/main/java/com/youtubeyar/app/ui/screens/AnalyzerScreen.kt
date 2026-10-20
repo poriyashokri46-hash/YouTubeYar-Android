@@ -81,35 +81,43 @@ class AnalyzerViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     fun analyze(handle: String, isOwn: Boolean) {
+        if (_state.value.loading) return
+
+        // Guard immediately, before the DataStore read, so rapid taps cannot launch
+        // duplicate YouTube API requests.
+        _state.value = _state.value.copy(
+            loading = true,
+            error = null,
+            own = if (isOwn) null else _state.value.own,
+            competitor = if (isOwn) _state.value.competitor else null
+        )
         viewModelScope.launch {
-            val key = settingsRepository.current().youtubeApiKey
-            if (key.isBlank()) {
-                _state.value = _state.value.copy(
-                    loading = false,
-                    error = "NO_API_KEY",
-                    own = if (isOwn) null else _state.value.own,
-                    competitor = if (isOwn) _state.value.competitor else null
-                )
-                return@launch
-            }
-            _state.value = _state.value.copy(
-                loading = true,
-                error = null,
-                own = if (isOwn) null else _state.value.own,
-                competitor = if (isOwn) _state.value.competitor else null
-            )
-            val result = analyzer.analyze(handle, key)
-            result.fold(
-                onSuccess = { analysis ->
-                    _state.value = if (isOwn)
-                        _state.value.copy(loading = false, own = analysis)
-                    else
-                        _state.value.copy(loading = false, competitor = analysis)
-                },
-                onFailure = { e ->
-                    _state.value = _state.value.copy(loading = false, error = e.message ?: "ERR")
+            try {
+                val key = settingsRepository.current().youtubeApiKey
+                if (key.isBlank()) {
+                    _state.value = _state.value.copy(error = "NO_API_KEY")
+                    return@launch
                 }
-            )
+
+                val result = analyzer.analyze(handle, key)
+                result.fold(
+                    onSuccess = { analysis ->
+                        _state.value = if (isOwn)
+                            _state.value.copy(own = analysis, error = null)
+                        else
+                            _state.value.copy(competitor = analysis, error = null)
+                    },
+                    onFailure = { error ->
+                        _state.value = _state.value.copy(error = error.message ?: "ERR")
+                    }
+                )
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _state.value = _state.value.copy(error = error.message ?: "ERR")
+            } finally {
+                _state.value = _state.value.copy(loading = false)
+            }
         }
     }
 }
