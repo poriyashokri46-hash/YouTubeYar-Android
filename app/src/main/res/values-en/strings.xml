@@ -107,6 +107,7 @@
     <string name="an_recent">Last 10 videos</string>
     <string name="an_insights">Auto insights</string>
     <string name="an_not_found">No channel found with that handle. Enter the handle without @ or paste the full link.</string>
+    <string name="an_unsupported_url">Invalid channel URL. Use @handle, youtube.com/@handle, or youtube.com/channel/UC...</string>
     <string name="an_error">Error connecting to YouTube. Check your API key and internet.</string>
     <string name="an_vs_you">Compare with my channel</string>
     <string name="an_compare_hint">Enter a competitor\'s handle to see their stats next to yours. Analyze your own channel from the "My channel" tab first.</string>
