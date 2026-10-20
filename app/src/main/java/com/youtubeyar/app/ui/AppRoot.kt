@@ -110,6 +110,7 @@ private fun MainScaffold(mainViewModel: MainViewModel) {
     // آماده‌سازی تبلیغات تپسل (اگر کلیدها تنظیم شده باشند)
     LaunchedEffect(Unit) {
         mainViewModel.adsManager.initIfNeeded()
+        mainViewModel.adsManager.preloadInterstitial()
     }
 
     val items = listOf(
