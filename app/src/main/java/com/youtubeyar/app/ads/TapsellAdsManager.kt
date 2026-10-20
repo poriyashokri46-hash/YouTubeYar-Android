@@ -109,22 +109,63 @@ class TapsellAdsManager @Inject constructor(
         }
     }
 
-    /** Show an interstitial only after three successful free AI generations. */
+    /**
+     * Respect the user's registered ad formats without interrupting every generation:
+     * show an interstitial on the 3rd free success and an instant video on the 6th.
+     */
     fun recordSuccessfulAiGeneration(activity: Activity, premium: Boolean) {
-        val shouldShow = synchronized(this) {
+        val adType = synchronized(this) {
             if (premium) {
-                false
+                null
             } else {
-                successfulFreeAiGenerations += 1
-                if (successfulFreeAiGenerations >= 3) {
-                    successfulFreeAiGenerations = 0
-                    true
-                } else {
-                    false
+                successfulFreeAiGenerations = (successfulFreeAiGenerations % 6) + 1
+                when (successfulFreeAiGenerations) {
+                    3 -> "interstitial"
+                    6 -> "instant_video"
+                    else -> null
                 }
             }
         }
-        if (shouldShow) showInterstitial(activity)
+        when (adType) {
+            "interstitial" -> showInterstitial(activity)
+            "instant_video" -> showInstantVideo(activity)
+        }
+    }
+
+    /** Requests and displays the registered instant-video zone when one is due. */
+    fun showInstantVideo(activity: Activity) {
+        val zone = context.getString(R.string.tapsell_zone_video_instant).trim()
+        if (!isConfigured() || zone.isBlank() || activity.isFinishing || activity.isDestroyed) return
+        initIfNeeded()
+        Tapsell.requestAd(
+            activity,
+            zone,
+            TapsellAdRequestOptions(),
+            object : TapsellAdRequestListener() {
+                override fun onAdAvailable(adId: String) {
+                    if (activity.isFinishing || activity.isDestroyed) return
+                    try {
+                        Tapsell.showAd(
+                            activity,
+                            zone,
+                            adId,
+                            TapsellShowOptions(),
+                            object : TapsellAdShowListener() {
+                                override fun onOpened() = Unit
+                                override fun onClosed() = Unit
+                                override fun onError(message: String) = Unit
+                                override fun onAdClicked() = Unit
+                                override fun onRewarded(completed: Boolean) = Unit
+                            }
+                        )
+                    } catch (_: Exception) {
+                        // Ads must never interrupt the core content-generation flow.
+                    }
+                }
+
+                override fun onError(message: String) = Unit
+            }
+        )
     }
 
     fun showRewarded(
