@@ -79,7 +79,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             channelName = p[K.CHANNEL_NAME] ?: "",
             channelHandle = p[K.CHANNEL_HANDLE] ?: "",
             channelNiche = p[K.CHANNEL_NICHE] ?: "",
-            youtubeApiKey = p[K.YT_KEY] ?: "",
+            youtubeApiKey = (p[K.YT_KEY] ?: "").ifBlank { context.getString(com.youtubeyar.app.R.string.youtube_api_key).trim() },
             aiProvider = p[K.AI_PROVIDER] ?: "offline",
             aiApiKey = p[K.AI_KEY] ?: "",
             bazaarRsa = p[K.BAZAAR_RSA] ?: "",
