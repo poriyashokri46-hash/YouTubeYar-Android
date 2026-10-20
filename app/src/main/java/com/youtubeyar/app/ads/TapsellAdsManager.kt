@@ -192,7 +192,7 @@ fun TapsellBanner(modifier: Modifier = Modifier) {
     DisposableEffect(bannerView, appKey, zone) {
         val application = activity.application
         Tapsell.initialize(application, appKey)
-        bannerView.setEventListener(object : TapsellBannerViewEventListener() {
+        bannerView.setEventListener(object : TapsellBannerViewEventListener {
             override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
             override fun onNoNetwork() { bannerView.visibility = View.GONE }
             override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
