@@ -130,7 +130,7 @@
     <string name="ai_copy_all">Copy all</string>
     <string name="ai_history">History</string>
     <string name="ai_clear">Clear</string>
-    <string name="ai_offline_badge">Offline</string>
+    <string name="ai_offline_badge">Offline · template-based</string>
     <string name="ai_remote_badge">Online</string>
     <string name="ai_need_key">For online mode pick a service and enter an API key in Settings. The offline engine is used meanwhile.</string>
     <string name="ai_limit_left">Generations left today: %1$s</string>
