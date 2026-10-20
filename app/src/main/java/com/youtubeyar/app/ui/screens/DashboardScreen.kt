@@ -311,7 +311,7 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             item { Spacer(Modifier.height(2.dp)) }
         }
 
-        TapsellBanner(premiumActive = premium)
+        if (!premium) TapsellBanner()
     }
 
     if (showDialog) {
