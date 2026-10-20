@@ -179,6 +179,7 @@
     <string name="pr_feature_3">Early access to upcoming tools</string>
     <string name="pr_feature_4">Supporting free app development</string>
     <string name="pr_month">Monthly plan</string>
+    <string name="pr_quarter">3-month subscription</string>
     <string name="pr_year">Yearly plan</string>
     <string name="pr_buy">Subscribe</string>
     <string name="pr_restore">Restore purchase</string>
