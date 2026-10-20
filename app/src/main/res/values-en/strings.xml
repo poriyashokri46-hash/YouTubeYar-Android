@@ -192,6 +192,8 @@
     <string name="pr_restore_none">No active purchase found.</string>
     <string name="pr_restore_ok">Your subscription was restored ✓</string>
     <string name="pr_error">Payment error: %1$s</string>
+    <string name="pr_ads_not_configured">Rewarded ads are not configured yet. Set the Tapsell app key and rewarded-ad zone before release.</string>
+    <string name="pr_no_ad_available">No rewarded ad is available right now. Please try again later.</string>
     <string name="pr_rsa_missing">For secure checkout, enter the store’s public RSA key in Settings before buying.</string>
     <string name="pr_signature_invalid">The purchase signature could not be verified, so Premium was not activated. Check the store’s public key.</string>
     <string name="pr_purchase_invalid">The purchase data is invalid. No subscription was activated.</string>
