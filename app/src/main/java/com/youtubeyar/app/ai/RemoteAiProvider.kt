@@ -22,7 +22,7 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
     data class ProviderInfo(val id: String, val name: String, val keyHint: String)
 
     val providers: List<ProviderInfo> = listOf(
-        ProviderInfo("offline", "آفلاین (داخل اپ)", "نیاز به کلید ندارد"),
+        ProviderInfo("offline", "آفلاین (داخل اپ)", "الگو-محور؛ مدل زبانی محلی نیست"),
         ProviderInfo("gemini", "Google Gemini", "کلید رایگان از aistudio.google.com"),
         ProviderInfo("openai", "OpenAI", "کلید از platform.openai.com"),
         ProviderInfo("deepseek", "DeepSeek", "کلید از platform.deepseek.com")
