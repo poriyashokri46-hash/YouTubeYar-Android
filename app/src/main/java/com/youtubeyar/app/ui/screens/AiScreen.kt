@@ -375,7 +375,9 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
             ui.note?.let {
                 item {
                     Text(
-                        stringResource(R.string.ai_error_remote),
+                        stringResource(
+                            if (it == "REMOTE_FAILED") R.string.ai_error_remote else R.string.ai_error_generation
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )
