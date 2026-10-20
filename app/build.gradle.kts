@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.youtubeyar.app"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.youtubeyar.app"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 2
         versionName = "2.0.0"
         vectorDrawables { useSupportLibrary = true }
