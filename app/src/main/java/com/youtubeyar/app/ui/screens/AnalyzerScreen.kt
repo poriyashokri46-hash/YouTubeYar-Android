@@ -201,6 +201,7 @@ fun AnalyzerScreen(navController: NavController, vm: AnalyzerViewModel = hiltVie
                             when (err) {
                                 "NO_API_KEY" -> stringResource(R.string.an_api_missing)
                                 "CHANNEL_NOT_FOUND" -> stringResource(R.string.an_not_found)
+                                "INVALID_CHANNEL_URL", "UNSUPPORTED_CHANNEL_URL" -> stringResource(R.string.an_unsupported_url)
                                 else -> stringResource(R.string.an_error)
                             },
                             Modifier.padding(12.dp),
