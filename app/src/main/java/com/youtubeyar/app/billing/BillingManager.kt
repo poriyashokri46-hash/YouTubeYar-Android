@@ -38,6 +38,7 @@ class BillingManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var pendingHelper: IabHelper? = null
     private var pendingSku: String? = null
+    private var pendingMarket: String? = null
     private var onPurchaseDone: ((Boolean, String) -> Unit)? = null
 
     fun detectMarket(): String? = when {
@@ -114,6 +115,7 @@ class BillingManager @Inject constructor(
         pendingHelper?.unbind()
         pendingHelper = null
         pendingSku = sku
+        pendingMarket = market
         onPurchaseDone = onResult
         val helper = IabHelper(context, market)
         pendingHelper = helper
@@ -149,6 +151,7 @@ class BillingManager @Inject constructor(
         val callback = onPurchaseDone
         onPurchaseDone = null
         pendingSku = null
+        pendingMarket = null
         callback?.invoke(success, message)
     }
 
@@ -167,7 +170,12 @@ class BillingManager @Inject constructor(
         }
 
         scope.launch {
-            val publicKey = runCatching { settings.current().bazaarRsa }.getOrDefault("")
+            val storeSettings = runCatching { settings.current() }.getOrNull()
+            val publicKey = when (pendingMarket) {
+                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa.orEmpty()
+                MYKET_PACKAGE -> storeSettings?.myketRsa.orEmpty()
+                else -> ""
+            }
             if (publicKey.isBlank()) {
                 finishPurchase(false, "RSA_KEY_MISSING", helper)
                 return@launch
