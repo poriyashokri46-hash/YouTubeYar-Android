@@ -30,8 +30,8 @@ val generateLauncherIconResources by tasks.registering {
     doLast {
         val outputRoot = launcherResourcesDir.get().asFile
         val fullTarget = File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
-        val roundTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher_round.jpg")
-        val adaptiveTarget = java.io.File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
+        val roundTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_round.jpg")
+        val adaptiveTarget = File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
         fullTarget.parentFile.mkdirs()
         adaptiveTarget.parentFile.mkdirs()
         val imageBytes = Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
