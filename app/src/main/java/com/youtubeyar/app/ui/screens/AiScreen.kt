@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.item
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -377,9 +376,8 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
                     ResultSection(section, clipboard)
                 }
             }
+            item { if (!premium) TapsellBanner() }
         }
-
-        item { if (!premium) TapsellBanner() }
     }
 }
 
