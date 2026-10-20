@@ -52,13 +52,9 @@ class BillingManager @Inject constructor(
         else -> "—"
     }
 
+    @Suppress("DEPRECATION")
     private fun isInstalled(pkg: String): Boolean = try {
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            context.packageManager.getPackageInfo(pkg, android.content.pm.PackageManager.PackageInfoFlags.of(0))
-        } else {
-            @Suppress("DEPRECATION")
-            context.packageManager.getPackageInfo(pkg, 0)
-        }
+        context.packageManager.getPackageInfo(pkg, 0)
         true
     } catch (_: Exception) {
         false
