@@ -64,7 +64,7 @@ import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.ads.TapsellAdsManager
 import com.youtubeyar.app.ads.TapsellBanner
-import com.youtubeyar.app.ai.AiHistory
+import com.youtubeyar.app.data.AiHistory
 import com.youtubeyar.app.ai.AiResult
 import com.youtubeyar.app.ai.AiSection
 import com.youtubeyar.app.ai.AiTool
