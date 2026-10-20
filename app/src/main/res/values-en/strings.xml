@@ -209,7 +209,9 @@
     <string name="st_ai_key">AI API key</string>
     <string name="st_ai_offline">Offline — no key needed</string>
     <string name="st_bazaar_rsa">Cafe Bazaar RSA public key</string>
-    <string name="st_bazaar_hint">From your Cafe Bazaar panel, in-app billing section (optional — for extra security)</string>
+    <string name="st_myket_rsa">Myket RSA public key</string>
+    <string name="st_myket_hint">If you buy through Myket, get its separate public key from the Myket developer panel and enter it here.</string>
+    <string name="st_bazaar_hint">Enter the public RSA key from the Cafe Bazaar developer panel. Purchases cannot be activated without a valid signature.</string>
     <string name="st_reminder_section">Daily reminder</string>
     <string name="st_reminder">Remind me about daily tasks</string>
     <string name="st_reminder_desc">A friendly daily notification reminding you to complete today\'s tasks.</string>
