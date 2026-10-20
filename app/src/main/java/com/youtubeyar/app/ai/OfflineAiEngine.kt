@@ -253,7 +253,7 @@ object OfflineAiEngine {
         AiSection("Video Ideas", listOf(
             "Complete $topic guide from zero",
             "$d-day $topic challenge with real results",
-            "Comparing $n tools for $topic",
+            "Comparing  ${n} tools for $topic",
             "Beginner mistakes in $topic",
             "One week living with $topic (vlog/doc)",
             "Q&A: answering your $topic questions",
