@@ -3,9 +3,9 @@ package com.youtubeyar.app.ai
 import kotlin.random.Random
 
 /**
- * موتور هوش مصنوعی آفلاین — کاملاً روی دستگاه بدون اینترنت و بدون کلید API کار می‌کند.
- * با فرمول‌های سئوی یوتیوب، بانک الگوهای فارسی/انگلیسی و تحلیل کلمات کلیدی موضوع،
- * عنوان، توضیحات، تگ، اسکریپت و ایده ویدیو تولید می‌کند.
+ * موتور آفلاین مبتنی بر قواعد و الگوها؛ بدون اینترنت و بدون کلید API.
+ * این موتور مدل زبانی محلی نیست؛ خروجی‌ها پیشنهادهای قابل ویرایش هستند و نباید
+ * به‌عنوان آمار تأییدشده، تجربه شخصی یا زمان‌بندی واقعی ویدیو تلقی شوند.
  */
 object OfflineAiEngine {
 
@@ -38,7 +38,6 @@ object OfflineAiEngine {
 
     private fun faTitles(topic: String, niche: String, tone: AiTone, rnd: Random): List<String> {
         val n = 5 + rnd.nextInt(7)          // 5..11
-        val d = 14 + rnd.nextInt(45)        // 14..58 روز
         val kw = keywords(topic).firstOrNull() ?: topic
         val hypePrefixes = listOf("شوکه‌کننده! ", "سرانجام: ", "باورنکردنی! ")
         val proPrefixes = listOf("راهنمای جامع ", "مستند ", "بررسی کامل ")
@@ -47,14 +46,14 @@ object OfflineAiEngine {
         val base = listOf(
             "$n ترفند $topic که هیچ‌کس به شما نمی‌گوید",
             "چرا $topic شما جواب نمی‌دهد؟ (راه‌حل واقعی)",
-            "چطور در $d روز روی $topic تسلط پیدا کنیم؟",
-            "$n اشتباه مرگبار در $topic که ۹۰٪ افراد می‌کنند",
+            "راهنمای مرحله‌به‌مرحله برای یادگیری $topic",
+            "$n اشتباه رایج هنگام کار با $topic",
             "راز $topic که فقط حرفه‌ای‌ها می‌دانند!",
             "$topic: روش کلاسیک یا مدرن؟ انتخاب درست",
-            "من $d روز فقط $topic انجام دادم؛ نتیجه شگفت‌زده‌ام کرد",
+            "چه چیزهایی هنگام تمرین $topic باید بررسی کنید؟",
             "آموزش کامل $topic از صفر تا صد (مخصوص مبتدی‌ها)",
             "بهترین روش‌های $topic در سال جدید (آپدیت کامل)",
-            "$n ابزار رایگان که $topic را ۱۰ برابر بهتر می‌کند",
+            "$n ابزار و منبع برای شروع کار با $topic",
             "همه‌چیز درباره $kw در یک ویدیو — $niche",
             "از صفر تا حرفه‌ای در $topic: نقشه راه واقعی"
         ).shuffled(rnd)
@@ -76,11 +75,11 @@ object OfflineAiEngine {
         return listOf(
             "$n $topic secrets nobody tells you",
             "Why your $topic isn't working (the real fix)",
-            "Master $topic in $d days — step by step",
-            "$n deadly $topic mistakes beginners make",
+            "A step-by-step guide to learning $topic",
+            "$n common mistakes beginners make with $topic",
             "The hidden truth about $topic",
             "$topic: classic vs modern, which one wins?",
-            "I did $topic for $d days — here's what happened",
+            "What to review when practicing $topic",
             "The complete $topic guide for beginners ($niche)"
         ).shuffled(rnd)
     }
@@ -115,7 +114,7 @@ object OfflineAiEngine {
             appendLine("🔥 در این ویدیو یاد می‌گیرید:")
             bullets.forEach { appendLine("• $it") }
             appendLine()
-            appendLine("⏱ زمان‌بندی ویدیو:")
+            appendLine("⏱ زمان‌بندی پیشنهادی (پس از تدوین ویدیو اصلاح شود):")
             appendLine("0:00 شروع و معرفی موضوع")
             appendLine("1:10 توضیح مفاهیم اصلی")
             appendLine("4:30 اجرای عملی و قدم‌به‌قدم")
@@ -124,7 +123,7 @@ object OfflineAiEngine {
             appendLine()
             appendLine("📌 اگر این ویدیو برای شما مفید بود، لایک کنید و کانال را سابسکرایب کنید تا ویدیوهای بعدی $topic را از دست ندهید! 🔔")
             appendLine()
-            appendLine("💬 سؤال شما درباره $topic چیست؟ در کامنت‌ها بنویسید؛ به همه پاسخ می‌دهم.")
+            appendLine("💬 سؤال‌تان درباره $topic را در کامنت‌ها بنویسید.")
             appendLine()
             appendLine("#$topic #آموزش_$topic #$niche")
             appendLine("کلیدواژه‌ها: $topic، $kwLine، آموزش $topic")
@@ -148,7 +147,6 @@ object OfflineAiEngine {
 
     private fun faTags(topic: String, niche: String): List<String> {
         val kw = keywords(topic).ifEmpty { listOf(topic) }
-        val year = "۲۰۲۵"
         val tags = linkedSetOf<String>()
         tags.add(topic)
         tags.add("آموزش $topic")
@@ -156,7 +154,6 @@ object OfflineAiEngine {
         tags.add("بهترین $topic")
         tags.add("ترفند $topic")
         tags.add("$topic پیشرفته")
-        tags.add("$topic $year")
         tags.add(niche)
         tags.add("آموزش ${niche}")
         for (w in kw.take(3)) {
