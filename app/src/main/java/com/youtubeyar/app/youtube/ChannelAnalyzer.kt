@@ -40,7 +40,7 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
         } else rawInput
 
         val path = pathOrInput.trim().trim('/')
-        if (looksLikeUrl && path.startsWith("c/")) {
+        if (looksLikeUrl && !(path.startsWith("@") || path.startsWith("channel/") || path.startsWith("user/"))) {
             return Result.failure(IllegalArgumentException("UNSUPPORTED_CHANNEL_URL"))
         }
         val isUsernameUrl = looksLikeUrl && path.startsWith("user/")
