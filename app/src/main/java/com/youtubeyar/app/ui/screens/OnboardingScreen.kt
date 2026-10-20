@@ -150,7 +150,12 @@ private fun IntroPage(icon: ImageVector, title: String, desc: String) {
             )
         }
         Spacer(Modifier.height(28.dp))
-        Text(title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center
+        )
         Spacer(Modifier.height(14.dp))
         Text(
             desc,
@@ -176,6 +181,7 @@ private fun SetupPage(
         Text(
             stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.ExtraBold
         )
         Spacer(Modifier.height(6.dp))
