@@ -24,6 +24,10 @@ jobs:
       - name: Make wrapper executable
         run: chmod +x ./gradlew
       - name: Build debug APK
+        env:
+          TAPSELL_APP_KEY: ${{ secrets.TAPSELL_APP_KEY }}
+          BAZAAR_RSA_PUBLIC_KEY: ${{ secrets.BAZAAR_RSA_PUBLIC_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: ./gradlew --no-daemon assembleDebug
       - name: Run unit tests
         run: ./gradlew --no-daemon testDebugUnitTest
