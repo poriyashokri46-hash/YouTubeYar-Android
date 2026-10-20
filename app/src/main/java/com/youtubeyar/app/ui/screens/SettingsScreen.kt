@@ -249,6 +249,22 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                 }
             }
 
+            /* حریم خصوصی */
+            SectionCard(title = stringResource(R.string.st_privacy)) {
+                Text(
+                    stringResource(R.string.st_privacy_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = { navController.navigate(com.youtubeyar.app.ui.Routes.PRIVACY) },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(stringResource(R.string.st_privacy))
+                }
+            }
+
             /* یادآور */
             SectionCard(title = stringResource(R.string.st_reminder_section)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
