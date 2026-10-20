@@ -21,7 +21,13 @@ android {
         // Tapsell's app key is packaged into the client APK, so it is not a server-side secret.
         // Keep it out of source control and inject it from GitHub Actions for release builds.
         resValue("string", "tapsell_app_key", System.getenv("TAPSELL_APP_KEY") ?: "")
-        resValue("string", "bazaar_rsa_public_key", System.getenv("BAZAAR_RSA_PUBLIC_KEY") ?: "")
+        // Normalize PEM formatting before generating an Android string resource:
+        // XML resources must not contain raw PEM headers or embedded line breaks.
+        val bazaarPublicKey = (System.getenv("BAZAAR_RSA_PUBLIC_KEY") ?: "")
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "")
+            .filterNot { it.isWhitespace() }
+        resValue("string", "bazaar_rsa_public_key", bazaarPublicKey)
         // Optional CI-provided YouTube key; runtime user-entered key remains supported.
         resValue("string", "youtube_api_key", System.getenv("YOUTUBE_API_KEY") ?: "")
         applicationId = "com.youtubeyar.app"
