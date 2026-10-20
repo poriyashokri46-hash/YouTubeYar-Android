@@ -23,11 +23,13 @@ val generateLauncherIconResources by tasks.registering {
     doLast {
         val outputRoot = launcherResourcesDir.get().asFile
         val fullTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
+        val roundTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher_round.jpg")
         val adaptiveTarget = java.io.File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
         fullTarget.parentFile.mkdirs()
         adaptiveTarget.parentFile.mkdirs()
         val imageBytes = java.util.Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
         fullTarget.writeBytes(imageBytes)
+        roundTarget.writeBytes(imageBytes)
 
         // Adaptive icons are masked by Android. Scale the artwork into the central safe zone.
         val source = javax.imageio.ImageIO.read(java.io.ByteArrayInputStream(imageBytes))
