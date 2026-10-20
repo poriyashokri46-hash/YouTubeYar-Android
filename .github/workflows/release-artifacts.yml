@@ -88,21 +88,21 @@ jobs:
             --ks-pass "env:ANDROID_KEYSTORE_PASSWORD" \
             --ks-key-alias "$ANDROID_KEY_ALIAS" \
             --key-pass "env:ANDROID_KEY_PASSWORD"
-          bin_file="$(find dist -maxdepth 1 -type f -name '*.bin' ! -name 'YouTubeYar-2.0.0.bin' -print -quit)"
+          bin_file="$(find dist -maxdepth 1 -type f -name '*.bin' ! -name 'YouTubeYar-1.0.0.bin' -print -quit)"
           if [[ -z "$bin_file" || ! -s "$bin_file" ]]; then
             echo "The official bundle signer did not produce a BIN file."
             exit 1
           fi
-          cp "$bin_file" dist/YouTubeYar-2.0.0.bin
-          cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-2.0.0.aab
-          (cd dist && sha256sum YouTubeYar-2.0.0.aab YouTubeYar-2.0.0.bin > SHA256SUMS.txt)
+          cp "$bin_file" dist/YouTubeYar-1.0.0.bin
+          cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-1.0.0.aab
+          (cd dist && sha256sum YouTubeYar-1.0.0.aab YouTubeYar-1.0.0.bin > SHA256SUMS.txt)
           echo "Release AAB and Bazaar BIN were generated."
 
       - name: Upload Cafe Bazaar release artifacts
-        if: always() && hashFiles('dist/YouTubeYar-2.0.0.aab', 'dist/YouTubeYar-2.0.0.bin') != ''
+        if: always() && hashFiles('dist/YouTubeYar-1.0.0.aab', 'dist/YouTubeYar-1.0.0.bin') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: YouTubeYar-2.0.0-cafe-bazaar
+          name: YouTubeYar-1.0.0-cafe-bazaar
           path: dist/*
           if-no-files-found: error
           retention-days: 14
