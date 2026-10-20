@@ -28,6 +28,7 @@ import ir.tapsell.sdk.bannerads.TapsellBannerView
 import ir.tapsell.sdk.bannerads.TapsellBannerViewEventListener
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** Tapsell SDK 4.9.x integration using the current request/show listener API. */
 @Singleton
@@ -182,15 +183,25 @@ class TapsellAdsManager @Inject constructor(
             onFail("REWARDED_ZONE_MISSING")
             return
         }
+        if (activity.isFinishing || activity.isDestroyed) {
+            onFail("SHOW_FAILED")
+            return
+        }
+
         initIfNeeded()
-        var completed = false
+        val finished = AtomicBoolean(false)
+        val showStarted = AtomicBoolean(false)
         Tapsell.requestAd(
             activity,
             zone,
             TapsellAdRequestOptions(),
             object : TapsellAdRequestListener() {
                 override fun onAdAvailable(adId: String) {
-                    if (completed) return
+                    if (finished.get() || !showStarted.compareAndSet(false, true)) return
+                    if (activity.isFinishing || activity.isDestroyed) {
+                        if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
+                        return
+                    }
                     try {
                         Tapsell.showAd(
                             activity,
@@ -200,38 +211,27 @@ class TapsellAdsManager @Inject constructor(
                             object : TapsellAdShowListener() {
                                 override fun onOpened() = Unit
                                 override fun onClosed() {
-                                    if (!completed) {
-                                        completed = true
+                                    if (finished.compareAndSet(false, true)) {
                                         onFail("AD_CLOSED_NO_REWARD")
                                     }
                                 }
                                 override fun onError(message: String) {
-                                    if (!completed) {
-                                        completed = true
-                                        onFail("SHOW_FAILED")
-                                    }
+                                    if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
                                 }
                                 override fun onAdClicked() = Unit
                                 override fun onRewarded(isRewarded: Boolean) {
-                                    if (completed) return
-                                    completed = true
+                                    if (!finished.compareAndSet(false, true)) return
                                     if (isRewarded) onReward() else onFail("NO_REWARD")
                                 }
                             }
                         )
                     } catch (e: Exception) {
-                        if (!completed) {
-                            completed = true
-                            onFail(e.message ?: "SHOW_FAILED")
-                        }
+                        if (finished.compareAndSet(false, true)) onFail(e.message ?: "SHOW_FAILED")
                     }
                 }
 
                 override fun onError(message: String) {
-                    if (!completed) {
-                        completed = true
-                        onFail("AD_ERROR")
-                    }
+                    if (finished.compareAndSet(false, true)) onFail("AD_ERROR")
                 }
             }
         )
