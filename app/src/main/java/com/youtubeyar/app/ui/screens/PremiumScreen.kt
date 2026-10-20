@@ -276,7 +276,10 @@ fun PremiumScreen(navController: NavController, mainViewModel: com.youtubeyar.ap
                         when (code) {
                             "CANCELLED" -> stringResource(R.string.pr_cancelled)
                             "NO_MARKET", "SERVICE_UNAVAILABLE" -> stringResource(R.string.pr_store_missing)
-                            "AD_FAIL", "NOT_CONFIGURED", "NO_AD" -> stringResource(R.string.error_generic)
+                            "RSA_KEY_MISSING" -> stringResource(R.string.pr_rsa_missing)
+                            "SIGNATURE_INVALID" -> stringResource(R.string.pr_signature_invalid)
+                            "INVALID_PURCHASE", "INVALID_PRODUCT" -> stringResource(R.string.pr_purchase_invalid)
+                            "AD_FAIL", "NOT_CONFIGURED", "NO_AD", "REWARDED_ZONE_MISSING" -> stringResource(R.string.error_generic)
                             else -> stringResource(R.string.pr_error, code)
                         },
                         style = MaterialTheme.typography.bodySmall,
