@@ -213,7 +213,7 @@
     <string name="st_yt_key_hint">Free from console.cloud.google.com — enable YouTube Data API v3 and create a key</string>
     <string name="st_ai_provider">AI service</string>
     <string name="st_ai_key">AI API key</string>
-    <string name="st_ai_offline">Offline — no key needed</string>
+    <string name="st_ai_offline">Template-based rules, not a local language model; no API key needed.</string>
     <string name="st_bazaar_rsa">Cafe Bazaar RSA public key</string>
     <string name="st_myket_rsa">Myket RSA public key</string>
     <string name="st_myket_hint">If you buy through Myket, get its separate public key from the Myket developer panel and enter it here.</string>
