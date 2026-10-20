@@ -63,6 +63,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.ads.TapsellAdsManager
+import com.youtubeyar.app.ads.TapsellBanner
 import com.youtubeyar.app.data.AiHistory
 import com.youtubeyar.app.ai.AiResult
 import com.youtubeyar.app.ai.AiSection
@@ -181,6 +182,12 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
     var tone by remember { mutableIntStateOf(AiTone.EDUCATIONAL.ordinal) }
     var showHistory by remember { mutableStateOf(false) }
 
+    LaunchedEffect(premium) {
+        vm.generationCompleted.collect {
+            (context as? Activity)?.let { vm.adsManager.recordSuccessfulAiGeneration(it, premium) }
+        }
+    }
+
     val tools = listOf(
         ToolUi(AiTool.TITLE, Icons.Filled.Title),
         ToolUi(AiTool.DESCRIPTION, Icons.Filled.Description),
@@ -211,6 +218,7 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item { if (!premium) TapsellBanner() }
             item {
                 Text(
                     stringResource(R.string.ai_desc),
