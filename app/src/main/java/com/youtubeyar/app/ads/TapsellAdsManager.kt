@@ -64,7 +64,7 @@ class TapsellAdsManager @Inject constructor(
             context,
             zone,
             TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener {
+            object : TapsellAdRequestListener() {
                 override fun onAdAvailable(adId: String) {
                     interstitialAdId = adId
                     interstitialZoneId = zone
@@ -95,7 +95,7 @@ class TapsellAdsManager @Inject constructor(
                 zone,
                 adId,
                 TapsellShowOptions(),
-                object : TapsellAdShowListener {
+                object : TapsellAdShowListener() {
                     override fun onOpened() = Unit
                     override fun onClosed() { preloadInterstitial() }
                     override fun onError(message: String) { preloadInterstitial() }
@@ -186,11 +186,11 @@ fun TapsellBanner(modifier: Modifier = Modifier) {
     val zone = stringResource(R.string.tapsell_zone_banner).trim()
     if (activity == null || appKey.isBlank() || zone.isBlank()) return
 
-    val bannerView = remember(activity, zone) { TapsellBannerView(activity) }
+    val bannerView = remember(activity, zone) { TapsellBannerView(activity, null) }
     DisposableEffect(bannerView, appKey, zone) {
         val application = activity.application
         Tapsell.initialize(application, appKey)
-        bannerView.setEventListener(object : TapsellBannerViewEventListener {
+        bannerView.setEventListener(object : TapsellBannerViewEventListener() {
             override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
             override fun onNoNetwork() { bannerView.visibility = View.GONE }
             override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
