@@ -108,8 +108,8 @@ class PremiumViewModel @Inject constructor(
                     _ui.value = _ui.value.copy(busy = false, message = "REWARD_OK")
                 }
             },
-            onFail = {
-                _ui.value = _ui.value.copy(busy = false, message = "AD_FAIL")
+            onFail = { error ->
+                _ui.value = _ui.value.copy(busy = false, message = error)
             }
         )
     }
@@ -125,6 +125,7 @@ fun PremiumScreen(navController: NavController, mainViewModel: com.youtubeyar.ap
 
     val premium = settings?.isPremium() ?: false
     val market = remember { vm.billing.detectMarket() }
+    val rewardedConfigured = vm.adsManager.isRewardedConfigured()
 
     LaunchedEffect(ui.message) {
         when (ui.message) {
@@ -260,9 +261,17 @@ fun PremiumScreen(navController: NavController, mainViewModel: com.youtubeyar.ap
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(10.dp))
+                        if (!rewardedConfigured) {
+                            Text(
+                                stringResource(R.string.pr_ads_not_configured),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        Spacer(Modifier.height(10.dp))
                         Button(
                             onClick = { (context as? Activity)?.let { vm.watchRewarded(it) } },
-                            enabled = !ui.busy,
+                            enabled = !ui.busy && rewardedConfigured,
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(14.dp)
                         ) { Text(stringResource(R.string.pr_watch_ad)) }
@@ -279,7 +288,8 @@ fun PremiumScreen(navController: NavController, mainViewModel: com.youtubeyar.ap
                             "RSA_KEY_MISSING" -> stringResource(R.string.pr_rsa_missing)
                             "SIGNATURE_INVALID" -> stringResource(R.string.pr_signature_invalid)
                             "INVALID_PURCHASE", "INVALID_PRODUCT" -> stringResource(R.string.pr_purchase_invalid)
-                            "AD_FAIL", "NOT_CONFIGURED", "NO_AD", "REWARDED_ZONE_MISSING" -> stringResource(R.string.error_generic)
+                            "NOT_CONFIGURED", "REWARDED_ZONE_MISSING" -> stringResource(R.string.pr_ads_not_configured)
+                            "NO_AD", "AD_CLOSED_NO_REWARD", "AD_ERROR", "SHOW_FAILED", "REQUEST_FAILED" -> stringResource(R.string.pr_no_ad_available)
                             else -> stringResource(R.string.pr_error, code)
                         },
                         style = MaterialTheme.typography.bodySmall,
