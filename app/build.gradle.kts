@@ -1,10 +1,3 @@
-import java.awt.Color
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
-import java.io.File
-import java.util.Base64
-import javax.imageio.ImageIO
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -20,65 +13,7 @@ val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
 val hasReleaseSigning = !releaseKeystorePath.isNullOrBlank()
 
-// The approved launcher artwork is stored as base64 text so the repository can
-// generate proper binary Android resources reproducibly during every build.
-val launcherResourcesDir = layout.buildDirectory.dir("generated/res/launcherIcons")
-val generateLauncherIconResources by tasks.registering {
-    val fullIcon = layout.projectDirectory.file("launcher-assets/ic_launcher_full.jpg.b64")
-    inputs.file(fullIcon)
-    outputs.dir(launcherResourcesDir)
-    doLast {
-        val outputRoot = launcherResourcesDir.get().asFile
-        val fullTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_approved.jpg")
-        val roundTarget = File(outputRoot, "mipmap-nodpi/ic_launcher_approved_round.jpg")
-        val adaptiveTarget = File(outputRoot, "drawable-nodpi/ic_launcher_approved_artwork.jpg")
-        fullTarget.parentFile.mkdirs()
-        adaptiveTarget.parentFile.mkdirs()
-        val imageBytes = Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
-        fullTarget.writeBytes(imageBytes)
-        roundTarget.writeBytes(imageBytes)
-
-        val source = ImageIO.read(ByteArrayInputStream(imageBytes))
-        val interpolation = RenderingHints.VALUE_INTERPOLATION_BICUBIC
-        val densitySizes = linkedMapOf("mdpi" to 48, "hdpi" to 72, "xhdpi" to 96, "xxhdpi" to 144, "xxxhdpi" to 192)
-        densitySizes.forEach { (density, size) ->
-            val densityDir = File(outputRoot, "mipmap-$density")
-            densityDir.mkdirs()
-            val resized = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
-            val graphics = resized.createGraphics()
-            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation)
-            graphics.drawImage(source, 0, 0, size, size, null)
-            graphics.dispose()
-            ImageIO.write(resized, "png", File(densityDir, "ic_launcher_approved.png"))
-            ImageIO.write(resized, "png", File(densityDir, "ic_launcher_approved_round.png"))
-        }
-
-        // Keep the complete artwork inside Android's adaptive-icon safe zone.
-        val safeSize = 128
-        val canvas = BufferedImage(192, 192, BufferedImage.TYPE_INT_RGB)
-        val graphics = canvas.createGraphics()
-        graphics.color = Color.BLACK
-        graphics.fillRect(0, 0, 192, 192)
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation)
-        graphics.drawImage(source, (192 - safeSize) / 2, (192 - safeSize) / 2, safeSize, safeSize, null)
-        graphics.dispose()
-        ImageIO.write(canvas, "jpg", adaptiveTarget)
-
-        val adaptiveXml = listOf(
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
-            "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">",
-            "    <background android:drawable=\"@color/launcher_icon_black\" />",
-            "    <foreground android:drawable=\"@drawable/ic_launcher_approved_artwork\" />",
-            "</adaptive-icon>"
-        ).joinToString("\n")
-        val adaptiveDir = File(outputRoot, "mipmap-anydpi-v26")
-        adaptiveDir.mkdirs()
-        File(adaptiveDir, "ic_launcher_approved.xml").writeText(adaptiveXml)
-        File(adaptiveDir, "ic_launcher_approved_round.xml").writeText(adaptiveXml)
-    }
-}
 android {
-    sourceSets.getByName("main").res.srcDir(launcherResourcesDir)
     namespace = "com.youtubeyar.app"
     compileSdk = 36
 
@@ -145,17 +80,6 @@ android {
         resources.excludes += "/META-INF/DEPENDENCIES"
     }
     lint { abortOnError = true }
-}
-
-tasks.configureEach {
-    val needsLauncherResources =
-        (name.startsWith("generate") && name.endsWith("Resources")) ||
-        (name.startsWith("map") && name.endsWith("SourceSetPaths")) ||
-        name.startsWith("extractDeepLinks") ||
-        (name.startsWith("merge") && name.endsWith("Resources"))
-    if (name != "generateLauncherIconResources" && needsLauncherResources) {
-        dependsOn(generateLauncherIconResources)
-    }
 }
 
 dependencies {
