@@ -6,6 +6,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,16 +30,19 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
 
     suspend fun generate(provider: String, apiKey: String, prompt: String): Result<String> {
         if (apiKey.isBlank()) return Result.failure(IllegalStateException("NO_KEY"))
-        return try {
-            val text = when (provider) {
-                "gemini" -> callGemini(apiKey, prompt)
-                "openai" -> callOpenAiCompatible("https://api.openai.com/v1/chat/completions", apiKey, "gpt-4o-mini", prompt)
-                "deepseek" -> callOpenAiCompatible("https://api.deepseek.com/chat/completions", apiKey, "deepseek-chat", prompt)
-                else -> return Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
+        return withContext(Dispatchers.IO) {
+            try {
+                val text = when (provider) {
+                    "gemini" -> callGemini(apiKey, prompt)
+                    "openai" -> callOpenAiCompatible("https://api.openai.com/v1/chat/completions", apiKey, "gpt-4o-mini", prompt)
+                    "deepseek" -> callOpenAiCompatible("https://api.deepseek.com/chat/completions", apiKey, "deepseek-chat", prompt)
+                    else -> return@withContext Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
+                }
+                if (text.isBlank()) Result.failure(IllegalStateException("EMPTY_RESPONSE"))
+                else Result.success(text)
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-            Result.success(text)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
