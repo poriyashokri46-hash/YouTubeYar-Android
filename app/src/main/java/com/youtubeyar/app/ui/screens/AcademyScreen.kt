@@ -47,7 +47,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.data.AcademyContent
-import com.youtubeyar.app.data.Lesson
+import com.youtubeyar.app.data.AcademyContent.Lesson
 import com.youtubeyar.app.data.SettingsRepository
 import com.youtubeyar.app.ui.components.SectionCard
 import dagger.hilt.android.lifecycle.HiltViewModel
