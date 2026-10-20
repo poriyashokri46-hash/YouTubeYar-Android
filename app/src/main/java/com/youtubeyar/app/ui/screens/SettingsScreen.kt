@@ -81,6 +81,7 @@ class SettingsViewModel @Inject constructor(
     fun setAiProvider(v: String) = viewModelScope.launch { settingsRepository.setAiProvider(v) }
     fun setAiKey(v: String) = viewModelScope.launch { settingsRepository.setAiKey(v) }
     fun setBazaarRsa(v: String) = viewModelScope.launch { settingsRepository.setBazaarRsa(v) }
+    fun setMyketRsa(v: String) = viewModelScope.launch { settingsRepository.setMyketRsa(v) }
     fun setReminder(enabled: Boolean) = viewModelScope.launch { settingsRepository.setReminderEnabled(enabled) }
 }
 
@@ -101,6 +102,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
     var ytKey by remember(s?.youtubeApiKey) { mutableStateOf(s?.youtubeApiKey ?: "") }
     var aiKey by remember(s?.aiApiKey) { mutableStateOf(s?.aiApiKey ?: "") }
     var rsa by remember(s?.bazaarRsa) { mutableStateOf(s?.bazaarRsa ?: "") }
+    var myketRsa by remember(s?.myketRsa) { mutableStateOf(s?.myketRsa ?: "") }
 
     val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         vm.setReminder(granted)
@@ -227,6 +229,22 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                 )
                 Spacer(Modifier.height(6.dp))
                 Button(onClick = { vm.setBazaarRsa(rsa); savedTick = true }, shape = RoundedCornerShape(12.dp)) {
+                    Text(stringResource(R.string.save))
+                }
+
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = myketRsa, onValueChange = { myketRsa = it },
+                    label = { Text(stringResource(R.string.st_myket_rsa)) },
+                    modifier = Modifier.fillMaxWidth(), singleLine = false, minLines = 2
+                )
+                Text(
+                    stringResource(R.string.st_myket_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
+                Button(onClick = { vm.setMyketRsa(myketRsa); savedTick = true }, shape = RoundedCornerShape(12.dp)) {
                     Text(stringResource(R.string.save))
                 }
             }
