@@ -38,6 +38,9 @@ object OfflineAiEngine {
     private val powerWordsFa = listOf(
         "رایگان", "سریع", "حرفه‌ای", "موفق", "رشد", "بهترین", "آسان", "آموزش", "راهنما", "مرحله‌به‌مرحله"
     )
+    private val powerWordsEn = listOf(
+        "free", "guide", "step-by-step", "beginner", "how to", "practical", "tips", "learn"
+    )
 
     /* ------------------------------- عنوان‌ها ------------------------------ */
 
@@ -88,13 +91,14 @@ object OfflineAiEngine {
         ).shuffled(rnd)
     }
 
-    /** امتیاز سئوی یک عنوان از ۰ تا ۱۰ */
-    fun seoScore(title: String): Int {
+    /** امتیاز تخمینی عنوان از ۱ تا ۱۰؛ معیار رسمی رتبه‌بندی یوتیوب نیست. */
+    fun seoScore(title: String, isEnglish: Boolean = false): Int {
         var score = 4
         val len = title.length
         if (len in 25..60) score += 2 else if (len in 18..70) score += 1 else if (len > 75) score -= 2
         if (title.any { it.isDigit() }) score += 2
-        if (powerWordsFa.any { title.contains(it) }) score += 2
+        val powerWords = if (isEnglish) powerWordsEn else powerWordsFa
+        if (powerWords.any { title.contains(it, ignoreCase = isEnglish) }) score += 2
         if (title.contains("?") || title.contains("؟")) score += 1
         return score.coerceIn(1, 10)
     }
@@ -281,7 +285,7 @@ object OfflineAiEngine {
         val sections: List<AiSection> = when (tool) {
             AiTool.TITLE -> {
                 val titles = if (isEnglish) enTitles(topic, niche, rnd) else faTitles(topic, niche, tone, rnd)
-                val scored = titles.map { it to seoScore(it) }.sortedByDescending { it.second }
+                val scored = titles.map { it to seoScore(it, isEnglish) }.sortedByDescending { it.second }
                 val list = scored.joinToString("\n") { (t, s) -> "[$s/10]  $t" }
                 if (isEnglish) {
                     listOf(
