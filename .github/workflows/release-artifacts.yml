@@ -24,10 +24,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: Run unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
-      - name: Run Android lint
-        run: ./gradlew --no-daemon lintDebug
       - name: Build installable debug APK
         run: ./gradlew --no-daemon assembleDebug
       - name: Build release APK and Android App Bundle
@@ -46,7 +42,12 @@ jobs:
           fi
           cp app/build/outputs/bundle/release/*.aab dist/YouTubeYar-2.0.0-release.aab
           (cd dist && sha256sum * > SHA256SUMS.txt)
+      - name: Run unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - name: Run Android lint
+        run: ./gradlew --no-daemon lintDebug
       - name: Upload build artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: YouTubeYar-2.0.0-build-artifacts
