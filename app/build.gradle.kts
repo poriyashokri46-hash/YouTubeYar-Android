@@ -22,11 +22,13 @@ android {
         // Keep it out of source control and inject it from GitHub Actions for release builds.
         resValue("string", "tapsell_app_key", System.getenv("TAPSELL_APP_KEY") ?: "")
         resValue("string", "bazaar_rsa_public_key", System.getenv("BAZAAR_RSA_PUBLIC_KEY") ?: "")
+        // Optional CI-provided YouTube key; runtime user-entered key remains supported.
+        resValue("string", "youtube_api_key", System.getenv("YOUTUBE_API_KEY") ?: "")
         applicationId = "com.youtubeyar.app"
         minSdk = 23
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "2.0.0"
         vectorDrawables { useSupportLibrary = true }
     }
 
