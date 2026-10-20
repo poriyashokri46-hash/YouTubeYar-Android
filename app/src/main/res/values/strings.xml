@@ -151,6 +151,7 @@
     <string name="ai_limit_left">تولیدهای باقی‌مانده امروز: %1$s</string>
     <string name="ai_limit_reached">سقف رایگان امروز (۵ بار) پر شد. برای نامحدود، اشتراک ویژه بگیرید یا ۲۴ ساعت رایگان با تماشای یک ویدیو باز کنید.</string>
     <string name="ai_error_remote">سرویس آنلاین پاسخ نداد؛ با موتور آفلاین جایگزین شد.</string>
+    <string name="ai_error_generation">تولید محتوا کامل نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="tool_title_gen">عنوان و سئو</string>
     <string name="tool_desc_gen">توضیحات ویدیو</string>
     <string name="tool_tag_gen">تگ‌ها</string>
