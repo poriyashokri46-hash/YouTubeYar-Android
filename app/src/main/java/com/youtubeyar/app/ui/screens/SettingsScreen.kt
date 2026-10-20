@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -181,7 +182,8 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                 OutlinedTextField(
                     value = ytKey, onValueChange = { ytKey = it },
                     label = { Text(stringResource(R.string.st_yt_key)) },
-                    modifier = Modifier.fillMaxWidth(), singleLine = true
+                    modifier = Modifier.fillMaxWidth(), singleLine = true,
+                    visualTransformation = PasswordVisualTransformation()
                 )
                 Text(
                     stringResource(R.string.st_yt_key_hint),
@@ -208,7 +210,8 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                     OutlinedTextField(
                         value = aiKey, onValueChange = { aiKey = it },
                         label = { Text(stringResource(R.string.st_ai_key)) },
-                        modifier = Modifier.fillMaxWidth(), singleLine = true
+                        modifier = Modifier.fillMaxWidth(), singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
                     )
                     Spacer(Modifier.height(6.dp))
                     Button(onClick = { vm.setAiKey(aiKey); savedTick = true }, shape = RoundedCornerShape(12.dp)) {
