@@ -146,35 +146,39 @@ class TapsellAdsManager @Inject constructor(
         val zone = context.getString(R.string.tapsell_zone_video_instant).trim()
         if (!isConfigured() || zone.isBlank() || activity.isFinishing || activity.isDestroyed) return
         initIfNeeded()
-        Tapsell.requestAd(
-            activity,
-            zone,
-            TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener() {
-                override fun onAdAvailable(adId: String) {
-                    if (activity.isFinishing || activity.isDestroyed) return
-                    try {
-                        Tapsell.showAd(
-                            activity,
-                            zone,
-                            adId,
-                            TapsellShowOptions(),
-                            object : TapsellAdShowListener() {
-                                override fun onOpened() = Unit
-                                override fun onClosed() = Unit
-                                override fun onError(message: String) = Unit
-                                override fun onAdClicked() = Unit
-                                override fun onRewarded(completed: Boolean) = Unit
-                            }
-                        )
-                    } catch (_: Exception) {
-                        // Ads must never interrupt the core content-generation flow.
+        try {
+            Tapsell.requestAd(
+                activity,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        if (activity.isFinishing || activity.isDestroyed) return
+                        try {
+                            Tapsell.showAd(
+                                activity,
+                                zone,
+                                adId,
+                                TapsellShowOptions(),
+                                object : TapsellAdShowListener() {
+                                    override fun onOpened() = Unit
+                                    override fun onClosed() = Unit
+                                    override fun onError(message: String) = Unit
+                                    override fun onAdClicked() = Unit
+                                    override fun onRewarded(completed: Boolean) = Unit
+                                }
+                            )
+                        } catch (_: Exception) {
+                            // Ads must never interrupt the core content-generation flow.
+                        }
                     }
-                }
 
-                override fun onError(message: String) = Unit
-            }
-        )
+                    override fun onError(message: String) = Unit
+                }
+            )
+        } catch (_: Exception) {
+            // Ad network or SDK failures must not interrupt content generation.
+        }
     }
 
     fun showRewarded(
