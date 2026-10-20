@@ -232,6 +232,9 @@ class BillingManager @Inject constructor(
                             onResult(false, "NOT_FOUND")
                         }
                     } catch (e: Exception) {
+                        // Fail closed: a stale cached subscription must not unlock VIP when
+                        // the store cannot verify the current entitlement.
+                        settings.setPremium(false)
                         onResult(false, e.message ?: "RESTORE_ERROR")
                     } finally {
                         helper.unbind()
@@ -241,6 +244,7 @@ class BillingManager @Inject constructor(
 
             override fun onError(message: String) {
                 helper.unbind()
+                scope.launch { settings.setPremium(false) }
                 onResult(false, message)
             }
         })
