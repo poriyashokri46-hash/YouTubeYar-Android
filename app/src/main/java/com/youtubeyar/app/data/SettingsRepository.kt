@@ -32,7 +32,8 @@ data class AppSettings(
     val bazaarRsa: String = "",
     val myketRsa: String = "",
     val premiumActive: Boolean = false,
-    val premiumTempUntil: Long = 0,          // آنلاک موقت ۲۴ ساعته با تماشای تبلیغ جایزه‌ای
+    val premiumTempUntil: Long = 0,          // Legacy field retained for data compatibility
+    val rewardedAiUses: Int = 0,              // تعداد استفاده‌های AI که با تبلیغ جایزه‌ای باز شده‌اند
     val aiUsedToday: Int = 0,
     val aiUsedDate: String = "",
     val dailyDate: String = "",              // تاریخ آخرین ریست وظایف روزانه
@@ -41,8 +42,7 @@ data class AppSettings(
     val lessonsDone: String = "",            // درس‌های خوانده‌شده آکادمی مثل "1,3,5"
     val reminderEnabled: Boolean = false
 ) {
-    fun isPremium(now: Long = System.currentTimeMillis()): Boolean =
-        premiumActive || now < premiumTempUntil
+    fun isPremium(now: Long = System.currentTimeMillis()): Boolean = premiumActive
 }
 
 @Singleton
@@ -62,6 +62,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val PREMIUM = booleanPreferencesKey("premium_active")
         val PREMIUM_TOKEN = stringPreferencesKey("premium_token")
         val PREMIUM_TEMP = longPreferencesKey("premium_temp_until")
+        val REWARDED_AI_USES = intPreferencesKey("rewarded_ai_uses")
         val AI_USED_COUNT = intPreferencesKey("ai_used_count")
         val AI_USED_DATE = stringPreferencesKey("ai_used_date")
         val DAILY_DATE = stringPreferencesKey("daily_date")
@@ -85,6 +86,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             myketRsa = p[K.MYKET_RSA] ?: "",
             premiumActive = p[K.PREMIUM] ?: false,
             premiumTempUntil = p[K.PREMIUM_TEMP] ?: 0,
+            rewardedAiUses = p[K.REWARDED_AI_USES] ?: 0,
             aiUsedToday = p[K.AI_USED_COUNT] ?: 0,
             aiUsedDate = p[K.AI_USED_DATE] ?: "",
             dailyDate = p[K.DAILY_DATE] ?: "",
@@ -120,9 +122,9 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         if (!active) it[K.PREMIUM_TOKEN] = ""
     }
 
-    /** آنلاک ۲۴ ساعته ویژه با تماشای تبلیغ جایزه‌ای تپسل */
-    suspend fun grantRewardedUnlock() = context.dataStore.edit {
-        it[K.PREMIUM_TEMP] = System.currentTimeMillis() + 24 * 60 * 60 * 1000L
+    /** هر تبلیغ جایزه‌ای موفق، دقیقاً دو بار استفاده از ابزار AI می‌دهد. */
+    suspend fun grantRewardedUnlock() = context.dataStore.edit { p ->
+        p[K.REWARDED_AI_USES] = ((p[K.REWARDED_AI_USES] ?: 0) + REWARDED_USES_PER_AD).coerceAtMost(100)
     }
 
     /**
@@ -134,9 +136,14 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         var allowed = false
         context.dataStore.edit { p ->
             val count = if (p[K.AI_USED_DATE] == todayStr) p[K.AI_USED_COUNT] ?: 0 else 0
-            val premiumNow = (p[K.PREMIUM] ?: false) ||
-                (p[K.PREMIUM_TEMP] ?: 0) > System.currentTimeMillis()
-            if (premiumNow || count < FREE_DAILY_LIMIT) {
+            val premiumNow = p[K.PREMIUM] ?: false
+            val rewardedUses = p[K.REWARDED_AI_USES] ?: 0
+            if (premiumNow) {
+                allowed = true
+            } else if (rewardedUses > 0) {
+                p[K.REWARDED_AI_USES] = rewardedUses - 1
+                allowed = true
+            } else if (count < FREE_DAILY_LIMIT) {
                 p[K.AI_USED_COUNT] = count + 1
                 p[K.AI_USED_DATE] = todayStr
                 allowed = true
@@ -174,5 +181,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
 
     companion object {
         const val FREE_DAILY_LIMIT = 5
+        const val REWARDED_USES_PER_AD = 2
     }
 }
