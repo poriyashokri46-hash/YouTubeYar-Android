@@ -190,50 +190,55 @@ class TapsellAdsManager @Inject constructor(
 
         initIfNeeded()
         val finished = AtomicBoolean(false)
+        val rewardReceived = AtomicBoolean(false)
         val showStarted = AtomicBoolean(false)
         try {
             Tapsell.requestAd(
-            activity,
-            zone,
-            TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener() {
-                override fun onAdAvailable(adId: String) {
-                    if (finished.get() || !showStarted.compareAndSet(false, true)) return
-                    if (activity.isFinishing || activity.isDestroyed) {
-                        if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
-                        return
-                    }
-                    try {
-                        Tapsell.showAd(
-                            activity,
-                            zone,
-                            adId,
-                            TapsellShowOptions(),
-                            object : TapsellAdShowListener() {
-                                override fun onOpened() = Unit
-                                override fun onClosed() {
-                                    if (finished.compareAndSet(false, true)) {
-                                        onFail("AD_CLOSED_NO_REWARD")
+                activity,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        if (finished.get() || !showStarted.compareAndSet(false, true)) return
+                        if (activity.isFinishing || activity.isDestroyed) {
+                            if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
+                            return
+                        }
+                        try {
+                            Tapsell.showAd(
+                                activity,
+                                zone,
+                                adId,
+                                TapsellShowOptions(),
+                                object : TapsellAdShowListener() {
+                                    override fun onOpened() = Unit
+                                    override fun onClosed() {
+                                        // Some SDK versions deliver the reward callback just after close.
+                                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                            if (!rewardReceived.get() && finished.compareAndSet(false, true)) {
+                                                onFail("AD_CLOSED_NO_REWARD")
+                                            }
+                                        }, 350L)
+                                    }
+                                    override fun onError(message: String) {
+                                        if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
+                                    }
+                                    override fun onAdClicked() = Unit
+                                    override fun onRewarded(isRewarded: Boolean) {
+                                        if (isRewarded) rewardReceived.set(true)
+                                        if (!finished.compareAndSet(false, true)) return
+                                        if (isRewarded) onReward() else onFail("NO_REWARD")
                                     }
                                 }
-                                override fun onError(message: String) {
-                                    if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
-                                }
-                                override fun onAdClicked() = Unit
-                                override fun onRewarded(isRewarded: Boolean) {
-                                    if (!finished.compareAndSet(false, true)) return
-                                    if (isRewarded) onReward() else onFail("NO_REWARD")
-                                }
-                            }
-                        )
-                    } catch (e: Exception) {
-                        if (finished.compareAndSet(false, true)) onFail(e.message ?: "SHOW_FAILED")
+                            )
+                        } catch (e: Exception) {
+                            if (finished.compareAndSet(false, true)) onFail(e.message ?: "SHOW_FAILED")
+                        }
                     }
-                }
 
-                override fun onError(message: String) {
-                    if (finished.compareAndSet(false, true)) onFail("AD_ERROR")
-                }
+                    override fun onError(message: String) {
+                        if (finished.compareAndSet(false, true)) onFail("AD_ERROR")
+                    }
                 }
             )
         } catch (error: Exception) {
