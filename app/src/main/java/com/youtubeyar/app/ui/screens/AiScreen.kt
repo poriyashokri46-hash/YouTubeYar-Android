@@ -118,46 +118,74 @@ class AiViewModel @Inject constructor(
 
     fun generate(tool: AiTool, topic: String, tone: AiTone, premium: Boolean) {
         if (topic.isBlank() || _ui.value.loading) return
+
+        // Set the loading flag before launching the coroutine so rapid taps cannot
+        // start multiple generations before DataStore responds.
+        _ui.value = _ui.value.copy(loading = true, note = null, limitReached = false)
         viewModelScope.launch {
-            if (!premium) {
-                val allowed = settingsRepository.consumeAiUse()
-                if (!allowed) {
-                    _ui.value = _ui.value.copy(limitReached = true, loading = false)
-                    return@launch
+            try {
+                if (!premium) {
+                    val allowed = settingsRepository.consumeAiUse()
+                    if (!allowed) {
+                        _ui.value = _ui.value.copy(
+                            limitReached = true,
+                            remaining = settingsRepository.remainingAiUses()
+                        )
+                        return@launch
+                    }
                 }
-            }
-            val s = settingsRepository.current()
-            _ui.value = _ui.value.copy(loading = true, note = null, limitReached = false)
-            val niche = s.channelNiche.ifBlank { topic }
-            val isEnglish = Locale.getDefault().language != "fa"
-            var result: AiResult? = null
 
-            if (s.aiProvider != "offline" && s.aiApiKey.isNotBlank()) {
-                val prompt = remote.buildPrompt(tool, topic, niche, tone)
-                remote.generate(s.aiProvider, s.aiApiKey, prompt).fold(
-                    onSuccess = { text ->
-                        result = AiResult(tool, topic, listOf(AiSection("نتایج", text)), s.aiProvider)
-                    },
-                    onFailure = { _ui.value = _ui.value.copy(note = "REMOTE_FAILED") }
-                )
-            }
-            if (result == null) {
-                result = OfflineAiEngine.generate(tool, topic, niche, tone, isEnglish)
-            }
+                val s = settingsRepository.current()
+                val niche = s.channelNiche.ifBlank { topic }
+                val isEnglish = Locale.getDefault().language != "fa"
+                var result: AiResult? = null
 
-            db.aiHistoryDao().insert(
-                AiHistory(
-                    toolType = tool.id,
-                    topic = topic,
-                    result = result!!.sections.joinToString("\n\n") { "${it.title}:\n${it.content}" }
+                if (s.aiProvider != "offline" && s.aiApiKey.isNotBlank()) {
+                    val remoteResult = try {
+                        val prompt = remote.buildPrompt(tool, topic, niche, tone)
+                        remote.generate(s.aiProvider, s.aiApiKey, prompt)
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Result.failure(error)
+                    }
+
+                    remoteResult.fold(
+                        onSuccess = { text ->
+                            if (text.isNotBlank()) {
+                                result = AiResult(tool, topic, listOf(AiSection("نتایج", text)), s.aiProvider)
+                            } else {
+                                _ui.value = _ui.value.copy(note = "REMOTE_FAILED")
+                            }
+                        },
+                        onFailure = { _ui.value = _ui.value.copy(note = "REMOTE_FAILED") }
+                    )
+                }
+
+                val finalResult = result ?: OfflineAiEngine.generate(tool, topic, niche, tone, isEnglish)
+                db.aiHistoryDao().insert(
+                    AiHistory(
+                        toolType = tool.id,
+                        topic = topic,
+                        result = finalResult.sections.joinToString("\n\n") { "${it.title}:\n${it.content}" }
+                    )
                 )
-            )
-            _ui.value = _ui.value.copy(
-                loading = false,
-                result = result,
-                remaining = settingsRepository.remainingAiUses()
-            )
-            _generationCompleted.tryEmit(Unit)
+                _ui.value = _ui.value.copy(
+                    result = finalResult,
+                    remaining = settingsRepository.remainingAiUses()
+                )
+                _generationCompleted.tryEmit(Unit)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _ui.value = _ui.value.copy(
+                    note = "GENERATION_FAILED",
+                    remaining = runCatching { settingsRepository.remainingAiUses() }
+                        .getOrDefault(_ui.value.remaining)
+                )
+            } finally {
+                _ui.value = _ui.value.copy(loading = false)
+            }
         }
     }
 
@@ -182,6 +210,12 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
     var tone by remember { mutableIntStateOf(AiTone.EDUCATIONAL.ordinal) }
     var showHistory by remember { mutableStateOf(false) }
 
+    LaunchedEffect(premium) {
+        vm.generationCompleted.collect {
+            (context as? Activity)?.let { vm.adsManager.recordSuccessfulAiGeneration(it, premium) }
+        }
+    }
+
     val tools = listOf(
         ToolUi(AiTool.TITLE, Icons.Filled.Title),
         ToolUi(AiTool.DESCRIPTION, Icons.Filled.Description),
@@ -190,12 +224,6 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
         ToolUi(AiTool.IDEAS, Icons.Filled.Lightbulb)
     )
 
-    // Interstitials are rate-limited by the ads manager and never interrupt every generation.
-    LaunchedEffect(premium) {
-        vm.generationCompleted.collect {
-            (context as? Activity)?.let { vm.adsManager.recordSuccessfulAiGeneration(it, premium) }
-        }
-    }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TopAppBar(
@@ -218,6 +246,7 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item { if (!premium) TapsellBanner() }
             item {
                 Text(
                     stringResource(R.string.ai_desc),
@@ -346,7 +375,9 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
             ui.note?.let {
                 item {
                     Text(
-                        stringResource(R.string.ai_error_remote),
+                        stringResource(
+                            if (it == "REMOTE_FAILED") R.string.ai_error_remote else R.string.ai_error_generation
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -380,7 +411,7 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
                     ResultSection(section, clipboard)
                 }
             }
-            item { if (!premium) TapsellBanner() }
+
         }
     }
 }

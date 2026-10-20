@@ -1,5 +1,7 @@
 package com.youtubeyar.app.ui.screens
 
+import com.youtubeyar.app.ads.TapsellBanner
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +53,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
-import com.youtubeyar.app.ads.TapsellBanner
 import com.youtubeyar.app.data.ProgressEntry
 import com.youtubeyar.app.data.RoadmapContent
 import com.youtubeyar.app.data.SettingsRepository
@@ -147,6 +148,7 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item { if (!premium) TapsellBanner() }
             /* ---------- دو حلقه پیشرفت ---------- */
             item {
                 SectionCard {
@@ -309,7 +311,7 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             }
 
             item { Spacer(Modifier.height(2.dp)) }
-            item { if (!premium) TapsellBanner() }
+
         }
     }
 

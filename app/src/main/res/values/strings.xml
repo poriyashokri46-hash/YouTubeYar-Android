@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">یوتیوب‌یار</string>
+    <!-- The public RSA key is generated from the BAZAAR_RSA_PUBLIC_KEY build secret. -->
 
-    <!-- کلیدهای تپسل — این‌ها را از پنل tapsell.ir پر کنید -->
-    <string name="tapsell_app_key" translatable="false"></string>
-    <string name="tapsell_zone_banner" translatable="false"></string>
-    <string name="tapsell_zone_interstitial" translatable="false"></string>
-    <string name="tapsell_zone_rewarded" translatable="false"></string>
+    <!-- App key is injected at build time from the TAPSELL_APP_KEY Actions secret. -->
+    <!-- Zone IDs are the user's current registered Tapsell zones. -->
+    <string name="tapsell_zone_banner" translatable="false">6ad7cab1be0ef33af832fffb</string>
+    <string name="tapsell_zone_interstitial" translatable="false">6ad7ca5fbe0ef33af832fff9</string>
+    <string name="tapsell_zone_rewarded" translatable="false">6ad7ca84be0ef33af832fffa</string>
+    <string name="tapsell_zone_video_instant" translatable="false">6ad7ca5fbe0ef33af832fff9</string>
 
     <!-- ناوبری -->
     <string name="nav_home">خانه</string>
@@ -148,6 +150,7 @@
     <string name="ai_limit_left">تولیدهای باقی‌مانده امروز: %1$s</string>
     <string name="ai_limit_reached">سقف رایگان امروز (۵ بار) پر شد. برای نامحدود، اشتراک ویژه بگیرید یا ۲۴ ساعت رایگان با تماشای یک ویدیو باز کنید.</string>
     <string name="ai_error_remote">سرویس آنلاین پاسخ نداد؛ با موتور آفلاین جایگزین شد.</string>
+    <string name="ai_error_generation">تولید محتوا کامل نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="tool_title_gen">عنوان و سئو</string>
     <string name="tool_desc_gen">توضیحات ویدیو</string>
     <string name="tool_tag_gen">تگ‌ها</string>
@@ -194,15 +197,16 @@
     <string name="pr_feature_3">اولویت در ابزارهای آینده</string>
     <string name="pr_feature_4">حمایت از توسعه اپ رایگان</string>
     <string name="pr_month">اشتراک ماهانه</string>
+    <string name="pr_quarter">اشتراک سه‌ماهه</string>
     <string name="pr_year">اشتراک سالانه</string>
     <string name="pr_buy">خرید اشتراک</string>
     <string name="pr_restore">بازیابی خرید</string>
     <string name="pr_rewarded_title">پول ندارید؟ مشکل نیست!</string>
-    <string name="pr_rewarded_desc">یک ویدیوی تبلیغاتی تماشا کنید و ۲۴ ساعت دسترسی ویژه رایگان بگیرید.</string>
-    <string name="pr_watch_ad">۲۴ ساعت ویژه رایگان</string>
+    <string name="pr_rewarded_desc">با تماشای کامل هر تبلیغ، ۲ بار استفاده از ابزارهای هوش مصنوعی دریافت کنید. هر بار که این اعتبار تمام شود، می‌توانید تبلیغ دیگری ببینید.</string>
+    <string name="pr_watch_ad">دریافت ۲ استفاده با تماشای تبلیغ</string>
     <string name="pr_store_missing">هیچ فروشگاهی (کافه‌بازار یا مایکت) روی گوشی نصب نیست. ابتدا یکی را نصب کنید.</string>
     <string name="pr_price_unavailable">قیمت از فروشگاه دریافت نشد</string>
-    <string name="pr_thanks">خرید شما ثبت شد. از حمایت شما سپاسگزاریم! ❤️</string>
+    <string name="pr_thanks">عملیات با موفقیت انجام شد. از همراهی شما سپاسگزاریم! ❤️</string>
     <string name="pr_cancelled">خرید لغو شد.</string>
     <string name="pr_restore_none">خرید فعالی پیدا نشد.</string>
     <string name="pr_restore_ok">اشتراک شما بازیابی شد ✓</string>
@@ -250,5 +254,5 @@
 
     <!-- پرده پرمیوم -->
     <string name="gate_title">این قابلیت ویژه است</string>
-    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا ۲۴ ساعت رایگان باز کنید.</string>
+    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا با تماشای تبلیغ، ۲ استفاده اضافه از هوش مصنوعی بگیرید.</string>
 </resources>

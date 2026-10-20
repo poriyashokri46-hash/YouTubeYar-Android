@@ -29,9 +29,10 @@ class BillingManager @Inject constructor(
         const val PURCHASE_REQUEST_CODE = 7001
         const val BAZAAR_PACKAGE = "com.farsitel.bazaar"
         const val MYKET_PACKAGE = "ir.mservices.market"
-        const val SKU_MONTH = "premium_month"
-        const val SKU_YEAR = "premium_year"
-        val ALL_SKUS = listOf(SKU_MONTH, SKU_YEAR)
+        const val SKU_MONTH = "youtubeyar_vip_monthly"
+        const val SKU_QUARTER = "youtubeyar_vip_3months"
+        const val SKU_YEAR = "youtubeyar_vip_yearly"
+        val ALL_SKUS = listOf(SKU_MONTH, SKU_QUARTER, SKU_YEAR)
         const val TYPE_SUBS = "subs"
     }
 
@@ -99,7 +100,7 @@ class BillingManager @Inject constructor(
         scope.launch {
             val storeSettings = runCatching { settings.current() }.getOrNull()
             val publicKey = when (market) {
-                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa.orEmpty()
+                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa?.takeIf { it.isNotBlank() } ?: context.getString(com.youtubeyar.app.R.string.bazaar_rsa_public_key).trim()
                 MYKET_PACKAGE -> storeSettings?.myketRsa.orEmpty()
                 else -> ""
             }
@@ -172,7 +173,7 @@ class BillingManager @Inject constructor(
         scope.launch {
             val storeSettings = runCatching { settings.current() }.getOrNull()
             val publicKey = when (pendingMarket) {
-                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa.orEmpty()
+                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa?.takeIf { it.isNotBlank() } ?: context.getString(com.youtubeyar.app.R.string.bazaar_rsa_public_key).trim()
                 MYKET_PACKAGE -> storeSettings?.myketRsa.orEmpty()
                 else -> ""
             }
@@ -194,7 +195,8 @@ class BillingManager @Inject constructor(
     fun restorePurchases(onResult: (Boolean, String) -> Unit) {
         val market = detectMarket()
         if (market == null) {
-            scope.launch { settings.setPremium(false) }
+            // A missing store is not proof that a previously verified subscription expired.
+            // Keep the cached entitlement until a successful store query confirms otherwise.
             onResult(false, "NO_MARKET")
             return
         }
@@ -205,12 +207,12 @@ class BillingManager @Inject constructor(
                     try {
                         val storeSettings = settings.current()
                         val publicKey = when (market) {
-                            BAZAAR_PACKAGE -> storeSettings.bazaarRsa
+                            BAZAAR_PACKAGE -> storeSettings.bazaarRsa.takeIf { it.isNotBlank() } ?: context.getString(com.youtubeyar.app.R.string.bazaar_rsa_public_key).trim()
                             MYKET_PACKAGE -> storeSettings.myketRsa
                             else -> ""
                         }
                         if (publicKey.isBlank()) {
-                            settings.setPremium(false)
+                            // Configuration failure is not an authoritative expiry signal.
                             onResult(false, "RSA_KEY_MISSING")
                             return@launch
                         }
@@ -231,6 +233,8 @@ class BillingManager @Inject constructor(
                             onResult(false, "NOT_FOUND")
                         }
                     } catch (e: Exception) {
+                        // A temporary service/query error is not proof of expiry.
+                        // Preserve the last verified state and let the user retry.
                         onResult(false, e.message ?: "RESTORE_ERROR")
                     } finally {
                         helper.unbind()
@@ -240,6 +244,7 @@ class BillingManager @Inject constructor(
 
             override fun onError(message: String) {
                 helper.unbind()
+                // Connection failure must not erase a previously verified subscription.
                 onResult(false, message)
             }
         })

@@ -5,21 +5,60 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+// Release signing values are supplied only by the release-artifacts CI workflow.
+// Never commit keystores or signing passwords to the repository.
+val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_FILE")
+val releaseKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+val hasReleaseSigning = !releaseKeystorePath.isNullOrBlank()
+
 android {
     namespace = "com.youtubeyar.app"
     compileSdk = 36
 
     defaultConfig {
+        // Tapsell's app key is packaged into the client APK, so it is not a server-side secret.
+        // Keep it out of source control and inject it from GitHub Actions for release builds.
+        resValue("string", "tapsell_app_key", System.getenv("TAPSELL_APP_KEY") ?: "")
+        // Normalize PEM formatting before generating an Android string resource:
+        // XML resources must not contain raw PEM headers or embedded line breaks.
+        val bazaarPublicKey = (System.getenv("BAZAAR_RSA_PUBLIC_KEY") ?: "")
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "")
+            .filterNot { it.isWhitespace() }
+        resValue("string", "bazaar_rsa_public_key", bazaarPublicKey)
+        // Optional CI-provided YouTube key; runtime user-entered key remains supported.
+        resValue("string", "youtube_api_key", System.getenv("YOUTUBE_API_KEY") ?: "")
         applicationId = "com.youtubeyar.app"
         minSdk = 23
         targetSdk = 36
-        versionCode = 2
-        versionName = "2.0.0"
+        versionCode = 1
+        versionName = "1.0.0"
         vectorDrawables { useSupportLibrary = true }
+    }
+
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigning) {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
+            // PR validation workflows do not receive repository signing secrets.
+            // Use debug signing only for those validation builds; the dedicated
+            // release-artifacts workflow provides the private release keystore.
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -79,17 +118,17 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // Network (YouTube Data API + هوش مصنوعی آنلاین اختیاری)
+    // Network (YouTube Data API + optional online AI)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // WorkManager (یادآور روزانه)
+    // WorkManager (daily reminders)
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-    // Tapsell SDK (تبلیغات) — آخرین نسخه منتشرشده روی Maven Central
+    // Tapsell SDK (ads)
     implementation("ir.tapsell.sdk:tapsell-sdk-android:4.9.16")
 }

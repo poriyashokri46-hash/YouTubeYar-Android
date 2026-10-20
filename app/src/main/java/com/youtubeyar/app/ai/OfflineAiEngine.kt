@@ -93,6 +93,7 @@ object OfflineAiEngine {
 
     /** امتیاز تخمینی عنوان از ۱ تا ۱۰؛ معیار رسمی رتبه‌بندی یوتیوب نیست. */
     fun seoScore(title: String, isEnglish: Boolean = false): Int {
+        if (title.isBlank()) return 1
         var score = 4
         val len = title.length
         if (len in 25..60) score += 2 else if (len in 18..70) score += 1 else if (len > 75) score -= 2

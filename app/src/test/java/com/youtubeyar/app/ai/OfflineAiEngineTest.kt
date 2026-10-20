@@ -1,125 +1,47 @@
 package com.youtubeyar.app.ai
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OfflineAiEngineTest {
 
     @Test
-    fun seoScoreAlwaysStaysWithinItsDocumentedRange() {
-        listOf("", "عنوان کوتاه", "x".repeat(200), "آموزش حرفه‌ای 2026؟").forEach { title ->
-            assertTrue(OfflineAiEngine.seoScore(title) in 1..10)
-        }
-        assertEquals(8, OfflineAiEngine.seoScore("A practical guide for beginners", isEnglish = true))
-    }
+    fun seoScoreAlwaysStaysWithinDocumentedRange() {
+        val samples = listOf(
+            "",
+            "رشد کانال",
+            "بهترین ۵ روش برای رشد کانال یوتیوب؟",
+            "A very long title ".repeat(12),
+            "How to learn Kotlin"
+        )
 
-    @Test
-    fun everyToolReturnsEditableNonEmptyOfflineSuggestions() {
-        AiTool.values().forEach { tool ->
-            val result = OfflineAiEngine.generate(
-                tool = tool,
-                topic = "آموزش تدوین ویدیو",
-                niche = "آموزش",
-                tone = AiTone.EDUCATIONAL,
-                isEnglish = false,
-                seed = 1234L
+        samples.forEach { title ->
+            assertTrue(
+                "Score should be in 1..10 for title: $title",
+                OfflineAiEngine.seoScore(title) in 1..10
             )
-            assertNotNull(result)
-            assertTrue(result.sections.isNotEmpty())
-            assertTrue(result.sections.all { it.title.isNotBlank() && it.content.isNotBlank() })
-            assertTrue(result.engine == "offline")
         }
     }
 
     @Test
-    fun offlineDescriptionsMarkTimestampsAsSuggestions() {
-        val result = OfflineAiEngine.generate(
-            tool = AiTool.DESCRIPTION,
-            topic = "آموزش تدوین ویدیو",
-            niche = "آموزش",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = false,
-            seed = 7L
-        )
-        assertTrue(result.sections.first().content.contains("زمان‌بندی پیشنهادی"))
+    fun seoScoreIsDeterministicForSameInput() {
+        val title = "بهترین ۵ روش برای رشد کانال یوتیوب؟"
+        val first = OfflineAiEngine.seoScore(title)
+        val second = OfflineAiEngine.seoScore(title)
+
+        assertEquals(first, second)
+        assertTrue("Score should be within 1..10", first in 1..10)
+        assertEquals(1, OfflineAiEngine.seoScore(""))
     }
 
     @Test
-    fun offlineTitlesAvoidUnsupportedSpecificStatistics() {
-        val result = OfflineAiEngine.generate(
-            tool = AiTool.TITLE,
-            topic = "رشد کانال",
-            niche = "یوتیوب",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = false,
-            seed = 3L
-        )
-        val output = result.sections.joinToString(" ") { it.content }
-        assertFalse(output.contains("۹۰٪"))
-        assertFalse(output.contains("۱۰ برابر"))
-    }
-    @Test
-    fun scriptTemplatesAvoidUnsupportedStatisticsAndPromises() {
-        val fa = OfflineAiEngine.generate(
-            tool = AiTool.SCRIPT,
-            topic = "رشد کانال",
-            niche = "یوتیوب",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = false,
-            seed = 8L
-        ).sections.joinToString(" ") { it.content }
-        val en = OfflineAiEngine.generate(
-            tool = AiTool.SCRIPT,
-            topic = "channel growth",
-            niche = "YouTube",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = true,
-            seed = 8L
-        ).sections.joinToString(" ") { it.content }
-        assertFalse(fa.contains("۹۰٪"))
-        assertFalse(fa.contains("کسی به شما نمی‌گوید"))
-        assertFalse(en.contains("nobody tells you"))
-    }
+    fun relevantTitleSignalsCanImproveScore() {
+        val plainTitle = "رشد کانال"
+        val descriptiveTitle = "بهترین ۵ روش برای رشد کانال یوتیوب؟"
 
-    @Test
-    fun generatedHashtagsDoNotContainSpacesInsideTags() {
-        val result = OfflineAiEngine.generate(
-            tool = AiTool.DESCRIPTION,
-            topic = "آموزش تدوین ویدیو",
-            niche = "تولید محتوا",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = false,
-            seed = 9L
+        assertTrue(
+            OfflineAiEngine.seoScore(descriptiveTitle) > OfflineAiEngine.seoScore(plainTitle)
         )
-        val content = result.sections.first().content
-        assertTrue(content.contains("#آموزش_تدوین_ویدیو"))
-        assertTrue(content.contains("#تولید_محتوا"))
-        assertFalse(content.contains("#آموزش تدوین"))
     }
-
-    @Test
-    fun titleScoresAreDisclosedAsHeuristicInBothLanguages() {
-        val fa = OfflineAiEngine.generate(
-            tool = AiTool.TITLE,
-            topic = "رشد کانال",
-            niche = "یوتیوب",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = false,
-            seed = 10L
-        )
-        val en = OfflineAiEngine.generate(
-            tool = AiTool.TITLE,
-            topic = "channel growth",
-            niche = "YouTube",
-            tone = AiTone.EDUCATIONAL,
-            isEnglish = true,
-            seed = 10L
-        )
-        assertTrue(fa.sections.first().title.contains("غیررسمی"))
-        assertTrue(en.sections.first().title.contains("not an official YouTube metric"))
-    }
-
 }

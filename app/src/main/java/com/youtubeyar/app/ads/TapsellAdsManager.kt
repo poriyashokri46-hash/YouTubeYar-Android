@@ -28,6 +28,7 @@ import ir.tapsell.sdk.bannerads.TapsellBannerView
 import ir.tapsell.sdk.bannerads.TapsellBannerViewEventListener
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** Tapsell SDK 4.9.x integration using the current request/show listener API. */
 @Singleton
@@ -52,33 +53,44 @@ class TapsellAdsManager @Inject constructor(
     fun initIfNeeded() {
         if (initialized || !isConfigured()) return
         val application = context.applicationContext as? Application ?: return
-        Tapsell.initialize(application, appKey())
-        initialized = true
+        try {
+            Tapsell.initialize(application, appKey())
+            initialized = true
+        } catch (_: Exception) {
+            // An unavailable ad SDK must not prevent the rest of the app from working.
+            initialized = false
+        }
     }
 
     fun preloadInterstitial() {
         val zone = interstitialZone()
-        if (!isConfigured() || zone.isBlank() || interstitialRequestInFlight) return
+        if (!isConfigured() || zone.isBlank() || interstitialRequestInFlight || !interstitialAdId.isNullOrBlank()) return
         initIfNeeded()
         interstitialRequestInFlight = true
-        Tapsell.requestAd(
-            context,
-            zone,
-            TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener() {
-                override fun onAdAvailable(adId: String) {
-                    interstitialAdId = adId
-                    interstitialZoneId = zone
-                    interstitialRequestInFlight = false
-                }
+        try {
+            Tapsell.requestAd(
+                context,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        interstitialAdId = adId
+                        interstitialZoneId = zone
+                        interstitialRequestInFlight = false
+                    }
 
-                override fun onError(message: String) {
-                    interstitialRequestInFlight = false
-                    interstitialAdId = null
-                    interstitialZoneId = null
+                    override fun onError(message: String) {
+                        interstitialRequestInFlight = false
+                        interstitialAdId = null
+                        interstitialZoneId = null
+                    }
                 }
-            }
-        )
+            )
+        } catch (_: Exception) {
+            interstitialRequestInFlight = false
+            interstitialAdId = null
+            interstitialZoneId = null
+        }
     }
 
     fun showInterstitial(activity: Activity) {
@@ -109,22 +121,69 @@ class TapsellAdsManager @Inject constructor(
         }
     }
 
-    /** Show an interstitial only after three successful free AI generations. */
+    /**
+     * Respect the user's registered ad formats without interrupting every generation:
+     * show an interstitial on the 3rd free success and an instant video on the 6th.
+     */
     fun recordSuccessfulAiGeneration(activity: Activity, premium: Boolean) {
-        val shouldShow = synchronized(this) {
+        // Begin loading early so the first scheduled interstitial can actually be shown.
+        if (!premium && interstitialAdId.isNullOrBlank()) preloadInterstitial()
+        val adType = synchronized(this) {
             if (premium) {
-                false
+                null
             } else {
-                successfulFreeAiGenerations += 1
-                if (successfulFreeAiGenerations >= 3) {
-                    successfulFreeAiGenerations = 0
-                    true
-                } else {
-                    false
+                successfulFreeAiGenerations = (successfulFreeAiGenerations % 6) + 1
+                when (successfulFreeAiGenerations) {
+                    3 -> "interstitial"
+                    6 -> "instant_video"
+                    else -> null
                 }
             }
         }
-        if (shouldShow) showInterstitial(activity)
+        when (adType) {
+            "interstitial" -> showInterstitial(activity)
+            "instant_video" -> showInstantVideo(activity)
+        }
+    }
+
+    /** Requests and displays the registered instant-video zone when one is due. */
+    fun showInstantVideo(activity: Activity) {
+        val zone = context.getString(R.string.tapsell_zone_video_instant).trim()
+        if (!isConfigured() || zone.isBlank() || activity.isFinishing || activity.isDestroyed) return
+        initIfNeeded()
+        try {
+            Tapsell.requestAd(
+                activity,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        if (activity.isFinishing || activity.isDestroyed) return
+                        try {
+                            Tapsell.showAd(
+                                activity,
+                                zone,
+                                adId,
+                                TapsellShowOptions(),
+                                object : TapsellAdShowListener() {
+                                    override fun onOpened() = Unit
+                                    override fun onClosed() = Unit
+                                    override fun onError(message: String) = Unit
+                                    override fun onAdClicked() = Unit
+                                    override fun onRewarded(completed: Boolean) = Unit
+                                }
+                            )
+                        } catch (_: Exception) {
+                            // Ads must never interrupt the core content-generation flow.
+                        }
+                    }
+
+                    override fun onError(message: String) = Unit
+                }
+            )
+        } catch (_: Exception) {
+            // Ad network or SDK failures must not interrupt content generation.
+        }
     }
 
     fun showRewarded(
@@ -141,59 +200,67 @@ class TapsellAdsManager @Inject constructor(
             onFail("REWARDED_ZONE_MISSING")
             return
         }
+        if (activity.isFinishing || activity.isDestroyed) {
+            onFail("SHOW_FAILED")
+            return
+        }
+
         initIfNeeded()
-        var completed = false
-        Tapsell.requestAd(
-            activity,
-            zone,
-            TapsellAdRequestOptions(),
-            object : TapsellAdRequestListener() {
-                override fun onAdAvailable(adId: String) {
-                    if (completed) return
-                    try {
-                        Tapsell.showAd(
-                            activity,
-                            zone,
-                            adId,
-                            TapsellShowOptions(),
-                            object : TapsellAdShowListener() {
-                                override fun onOpened() = Unit
-                                override fun onClosed() {
-                                    if (!completed) {
-                                        completed = true
-                                        onFail("AD_CLOSED_NO_REWARD")
+        val finished = AtomicBoolean(false)
+        val rewardReceived = AtomicBoolean(false)
+        val showStarted = AtomicBoolean(false)
+        try {
+            Tapsell.requestAd(
+                activity,
+                zone,
+                TapsellAdRequestOptions(),
+                object : TapsellAdRequestListener() {
+                    override fun onAdAvailable(adId: String) {
+                        if (finished.get() || !showStarted.compareAndSet(false, true)) return
+                        if (activity.isFinishing || activity.isDestroyed) {
+                            if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
+                            return
+                        }
+                        try {
+                            Tapsell.showAd(
+                                activity,
+                                zone,
+                                adId,
+                                TapsellShowOptions(),
+                                object : TapsellAdShowListener() {
+                                    override fun onOpened() = Unit
+                                    override fun onClosed() {
+                                        // Some SDK versions deliver the reward callback just after close.
+                                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                            if (!rewardReceived.get() && finished.compareAndSet(false, true)) {
+                                                onFail("AD_CLOSED_NO_REWARD")
+                                            }
+                                        }, 350L)
+                                    }
+                                    override fun onError(message: String) {
+                                        if (finished.compareAndSet(false, true)) onFail("SHOW_FAILED")
+                                    }
+                                    override fun onAdClicked() = Unit
+                                    override fun onRewarded(isRewarded: Boolean) {
+                                        if (isRewarded) rewardReceived.set(true)
+                                        if (!finished.compareAndSet(false, true)) return
+                                        if (isRewarded) onReward() else onFail("NO_REWARD")
                                     }
                                 }
-                                override fun onError(message: String) {
-                                    if (!completed) {
-                                        completed = true
-                                        onFail("SHOW_FAILED")
-                                    }
-                                }
-                                override fun onAdClicked() = Unit
-                                override fun onRewarded(isRewarded: Boolean) {
-                                    if (completed) return
-                                    completed = true
-                                    if (isRewarded) onReward() else onFail("NO_REWARD")
-                                }
-                            }
-                        )
-                    } catch (e: Exception) {
-                        if (!completed) {
-                            completed = true
-                            onFail(e.message ?: "SHOW_FAILED")
+                            )
+                        } catch (e: Exception) {
+                            if (finished.compareAndSet(false, true)) onFail(e.message ?: "SHOW_FAILED")
                         }
                     }
-                }
 
-                override fun onError(message: String) {
-                    if (!completed) {
-                        completed = true
-                        onFail("AD_ERROR")
+                    override fun onError(message: String) {
+                        if (finished.compareAndSet(false, true)) onFail("AD_ERROR")
                     }
                 }
-            }
-        )
+            )
+        } catch (error: Exception) {
+            if (finished.compareAndSet(false, true)) onFail(error.message ?: "AD_ERROR")
+        }
     }
 }
 
@@ -209,18 +276,22 @@ fun TapsellBanner(modifier: Modifier = Modifier) {
         LayoutInflater.from(activity).inflate(R.layout.tapsell_banner, null, false) as TapsellBannerView
     }
     DisposableEffect(bannerView, appKey, zone) {
-        val application = activity.application
-        Tapsell.initialize(application, appKey)
-        bannerView.setEventListener(object : TapsellBannerViewEventListener {
-            override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
-            override fun onNoNetwork() { bannerView.visibility = View.GONE }
-            override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
-            override fun onRequestFilled() { bannerView.visibility = View.VISIBLE }
-            override fun onHideBannerView() { bannerView.visibility = View.GONE }
-            override fun onAdClicked() = Unit
-        })
-        bannerView.loadAd(activity, zone, TapsellBannerType.BANNER_320x50)
-        onDispose { bannerView.destroy() }
+        try {
+            val application = activity.application
+            Tapsell.initialize(application, appKey)
+            bannerView.setEventListener(object : TapsellBannerViewEventListener {
+                override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
+                override fun onNoNetwork() { bannerView.visibility = View.GONE }
+                override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
+                override fun onRequestFilled() { bannerView.visibility = View.VISIBLE }
+                override fun onHideBannerView() { bannerView.visibility = View.GONE }
+                override fun onAdClicked() = Unit
+            })
+            bannerView.loadAd(activity, zone, TapsellBannerType.BANNER_320x50)
+        } catch (_: Exception) {
+            bannerView.visibility = View.GONE
+        }
+        onDispose { runCatching { bannerView.destroy() } }
     }
     AndroidView(
         factory = { bannerView },

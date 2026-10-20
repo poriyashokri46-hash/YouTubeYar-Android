@@ -136,6 +136,7 @@
     <string name="ai_limit_left">Generations left today: %1$s</string>
     <string name="ai_limit_reached">Daily free limit (5) reached. Go Premium for unlimited use, or unlock 24 hours free by watching one video.</string>
     <string name="ai_error_remote">Online service failed; the offline engine was used instead.</string>
+    <string name="ai_error_generation">Content generation did not complete. Please try again.</string>
     <string name="tool_title_gen">Titles &amp; SEO</string>
     <string name="tool_desc_gen">Description</string>
     <string name="tool_tag_gen">Tags</string>
@@ -179,6 +180,7 @@
     <string name="pr_feature_3">Early access to upcoming tools</string>
     <string name="pr_feature_4">Supporting free app development</string>
     <string name="pr_month">Monthly plan</string>
+    <string name="pr_quarter">3-month subscription</string>
     <string name="pr_year">Yearly plan</string>
     <string name="pr_buy">Subscribe</string>
     <string name="pr_restore">Restore purchase</string>

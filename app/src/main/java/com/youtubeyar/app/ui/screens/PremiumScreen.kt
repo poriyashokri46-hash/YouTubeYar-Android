@@ -239,6 +239,14 @@ fun PremiumScreen(navController: NavController, mainViewModel: com.youtubeyar.ap
                             )
                             Spacer(Modifier.height(8.dp))
                             PriceButton(
+                                title = stringResource(R.string.pr_quarter),
+                                price = ui.prices[BillingManager.SKU_QUARTER] ?: stringResource(R.string.pr_price_unavailable),
+                                enabled = !ui.busy,
+                                busy = false,
+                                onClick = { (context as? Activity)?.let { vm.buy(it, BillingManager.SKU_QUARTER) } }
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            PriceButton(
                                 title = stringResource(R.string.pr_year),
                                 price = ui.prices[BillingManager.SKU_YEAR] ?: stringResource(R.string.pr_price_unavailable),
                                 enabled = !ui.busy,
