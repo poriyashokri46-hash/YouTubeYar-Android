@@ -62,6 +62,8 @@ class TapsellAdsManager @Inject constructor(
 
     private fun isConfigured(): Boolean = appKey(context).isNotBlank()
 
+    fun isRewardedConfigured(): Boolean = isConfigured() && rewardedZone(context).isNotBlank()
+
     fun initIfNeeded() {
         if (initialized || !isConfigured()) return
         try {
