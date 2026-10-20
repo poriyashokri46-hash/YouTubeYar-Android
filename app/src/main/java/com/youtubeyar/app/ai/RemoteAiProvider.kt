@@ -6,6 +6,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -40,6 +41,8 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
                 }
                 if (text.isBlank()) Result.failure(IllegalStateException("EMPTY_RESPONSE"))
                 else Result.success(text)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Result.failure(e)
             }
