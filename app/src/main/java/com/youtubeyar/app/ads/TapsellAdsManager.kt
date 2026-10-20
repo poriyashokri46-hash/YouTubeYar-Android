@@ -276,18 +276,22 @@ fun TapsellBanner(modifier: Modifier = Modifier) {
         LayoutInflater.from(activity).inflate(R.layout.tapsell_banner, null, false) as TapsellBannerView
     }
     DisposableEffect(bannerView, appKey, zone) {
-        val application = activity.application
-        Tapsell.initialize(application, appKey)
-        bannerView.setEventListener(object : TapsellBannerViewEventListener {
-            override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
-            override fun onNoNetwork() { bannerView.visibility = View.GONE }
-            override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
-            override fun onRequestFilled() { bannerView.visibility = View.VISIBLE }
-            override fun onHideBannerView() { bannerView.visibility = View.GONE }
-            override fun onAdClicked() = Unit
-        })
-        bannerView.loadAd(activity, zone, TapsellBannerType.BANNER_320x50)
-        onDispose { bannerView.destroy() }
+        try {
+            val application = activity.application
+            Tapsell.initialize(application, appKey)
+            bannerView.setEventListener(object : TapsellBannerViewEventListener {
+                override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
+                override fun onNoNetwork() { bannerView.visibility = View.GONE }
+                override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
+                override fun onRequestFilled() { bannerView.visibility = View.VISIBLE }
+                override fun onHideBannerView() { bannerView.visibility = View.GONE }
+                override fun onAdClicked() = Unit
+            })
+            bannerView.loadAd(activity, zone, TapsellBannerType.BANNER_320x50)
+        } catch (_: Exception) {
+            bannerView.visibility = View.GONE
+        }
+        onDispose { runCatching { bannerView.destroy() } }
     }
     AndroidView(
         factory = { bannerView },
