@@ -1,3 +1,10 @@
+import java.awt.Color
+import java.awt.RenderingHints
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.io.File
+import java.util.Base64
+import javax.imageio.ImageIO
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -22,26 +29,26 @@ val generateLauncherIconResources by tasks.registering {
     outputs.dir(launcherResourcesDir)
     doLast {
         val outputRoot = launcherResourcesDir.get().asFile
-        val fullTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
+        val fullTarget = File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
         val roundTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher_round.jpg")
         val adaptiveTarget = java.io.File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
         fullTarget.parentFile.mkdirs()
         adaptiveTarget.parentFile.mkdirs()
-        val imageBytes = java.util.Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
+        val imageBytes = Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
         fullTarget.writeBytes(imageBytes)
         roundTarget.writeBytes(imageBytes)
 
         // Adaptive icons are masked by Android. Scale the artwork into the central safe zone.
-        val source = javax.imageio.ImageIO.read(java.io.ByteArrayInputStream(imageBytes))
+        val source = ImageIO.read(ByteArrayInputStream(imageBytes))
         val safeSize = 128
-        val canvas = java.awt.image.BufferedImage(192, 192, java.awt.image.BufferedImage.TYPE_INT_RGB)
+        val canvas = BufferedImage(192, 192, BufferedImage.TYPE_INT_RGB)
         val graphics = canvas.createGraphics()
-        graphics.color = java.awt.Color.BLACK
+        graphics.color = Color.BLACK
         graphics.fillRect(0, 0, 192, 192)
-        graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
         graphics.drawImage(source, (192 - safeSize) / 2, (192 - safeSize) / 2, safeSize, safeSize, null)
         graphics.dispose()
-        javax.imageio.ImageIO.write(canvas, "jpg", adaptiveTarget)
+        ImageIO.write(canvas, "jpg", adaptiveTarget)
     }
 }
 
