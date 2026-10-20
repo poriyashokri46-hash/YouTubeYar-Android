@@ -249,7 +249,10 @@ object OfflineAiEngine {
         )
     }
 
-    private fun enIdeas(topic: String, niche: String, rnd: Random): List<AiSection> = listOf(
+    private fun enIdeas(topic: String, niche: String, rnd: Random): List<AiSection> {
+        val n = 5 + rnd.nextInt(7)
+        val d = 14 + rnd.nextInt(45)
+        return listOf(
         AiSection("Video Ideas", listOf(
             "Complete $topic guide from zero",
             "$d-day $topic challenge with real results",
@@ -260,7 +263,8 @@ object OfflineAiEngine {
             "$topic in 60 seconds (Shorts)",
             "Case study: success in $niche"
         ).shuffled(rnd).mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n"))
-    )
+        )
+    }
 
     /* ---------------------------- نقطه ورود اصلی --------------------------- */
 
