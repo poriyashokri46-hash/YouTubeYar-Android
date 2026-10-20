@@ -41,7 +41,7 @@ jobs:
       - name: Build debug and release APKs and run lint
         run: |
           chmod +x ./gradlew
-          ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:lintDebug
+          ./gradlew --no-daemon --console=plain --info :app:assembleDebug :app:assembleRelease :app:lintDebug
       - name: Upload debug APK
         if: success()
         uses: actions/upload-artifact@v4
