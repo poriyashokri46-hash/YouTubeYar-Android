@@ -192,6 +192,9 @@
     <string name="pr_restore_none">No active purchase found.</string>
     <string name="pr_restore_ok">Your subscription was restored ✓</string>
     <string name="pr_error">Payment error: %1$s</string>
+    <string name="pr_rsa_missing">For secure checkout, enter the store's public RSA key in Settings before buying.</string>
+    <string name="pr_signature_invalid">The purchase signature could not be verified, so Premium was not activated. Check the store's public key.</string>
+    <string name="pr_purchase_invalid">The purchase data is invalid. No subscription was activated.</string>
 
     <string name="st_appearance">Appearance</string>
     <string name="st_theme">Theme</string>
