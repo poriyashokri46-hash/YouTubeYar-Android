@@ -113,10 +113,16 @@ class IabHelper(private val context: Context, private val marketPackage: String)
         }
         val dataList = (response.get("INAPP_PURCHASE_DATA_LIST") as? ArrayList<*>)
             ?.mapNotNull { it as? String }
+            ?.takeIf { it.isNotEmpty() }
             ?: (response.get("INAPP_PURCHASE_DATA") as? String)?.let { listOf(it) }
             ?: return out
+        // Some IAB v3 implementations return a list while others return a single
+        // purchase/signature pair. Preserve both forms so restore can verify valid purchases.
         val signatures = (response.get("INAPP_DATA_SIGNATURE_LIST") as? ArrayList<*>)
-            ?.mapNotNull { it as? String }.orEmpty()
+            ?.mapNotNull { it as? String }
+            ?.takeIf { it.isNotEmpty() }
+            ?: (response.get("INAPP_DATA_SIGNATURE") as? String)?.let { listOf(it) }
+            .orEmpty()
         dataList.forEachIndexed { index, json ->
             try {
                 val o = JSONObject(json)
