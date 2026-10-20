@@ -1,4 +1,4 @@
-name: Build APK AAB BIN artifacts
+name: Build test APK for Cafe Bazaar
 
 on:
   push:
@@ -24,33 +24,24 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: Build installable debug APK
+      - name: Build installable debug APK for initial testing
         run: ./gradlew --no-daemon assembleDebug
-      - name: Build release APK and Android App Bundle
-        run: ./gradlew --no-daemon assembleRelease bundleRelease
-      - name: Prepare requested .bin alias and checksums
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          cp app/build/outputs/apk/debug/*.apk dist/YouTubeYar-2.0.0-debug.apk
-          if compgen -G 'app/build/outputs/apk/release/*.apk' > /dev/null; then
-            cp app/build/outputs/apk/release/*.apk dist/YouTubeYar-2.0.0-release.apk
-            # .bin is a byte-for-byte APK alias for workflows that require a .bin extension;
-            # it is not a separate Android package format.
-            cp dist/YouTubeYar-2.0.0-release.apk dist/YouTubeYar-2.0.0-release.bin
-          fi
-          cp app/build/outputs/bundle/release/*.aab dist/YouTubeYar-2.0.0-release.aab
-          (cd dist && sha256sum * > SHA256SUMS.txt)
       - name: Run unit tests
         run: ./gradlew --no-daemon testDebugUnitTest
       - name: Run Android lint
         run: ./gradlew --no-daemon lintDebug
-      - name: Upload build artifacts
-        if: always()
+      - name: Prepare test APK and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/*.apk dist/YouTubeYar-2.0.0-test-debug.apk
+          (cd dist && sha256sum YouTubeYar-2.0.0-test-debug.apk > SHA256SUMS.txt)
+      - name: Upload test APK
+        if: always() && hashFiles('dist/YouTubeYar-2.0.0-test-debug.apk') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: YouTubeYar-2.0.0-build-artifacts
+          name: YouTubeYar-2.0.0-test-apk
           path: dist/*
           if-no-files-found: error
           retention-days: 14
