@@ -13,7 +13,28 @@ val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
 val hasReleaseSigning = !releaseKeystorePath.isNullOrBlank()
 
+// The approved launcher artwork is stored as base64 text so the repository can
+// generate proper binary Android resources reproducibly during every build.
+val launcherResourcesDir = layout.buildDirectory.dir("generated/res/launcherIcons")
+val generateLauncherIconResources by tasks.registering {
+    val fullIcon = layout.projectDirectory.file("launcher-assets/ic_launcher_full.jpg.b64")
+    val adaptiveIcon = layout.projectDirectory.file("launcher-assets/ic_launcher_adaptive.jpg.b64")
+    inputs.files(fullIcon, adaptiveIcon)
+    outputs.dir(launcherResourcesDir)
+    doLast {
+        val outputRoot = launcherResourcesDir.get().asFile
+        val fullTarget = java.io.File(outputRoot, "mipmap-nodpi/ic_launcher.jpg")
+        val adaptiveTarget = java.io.File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
+        fullTarget.parentFile.mkdirs()
+        adaptiveTarget.parentFile.mkdirs()
+        val decoder = java.util.Base64.getDecoder()
+        fullTarget.writeBytes(decoder.decode(fullIcon.asFile.readText().trim()))
+        adaptiveTarget.writeBytes(decoder.decode(adaptiveIcon.asFile.readText().trim()))
+    }
+}
+
 android {
+    sourceSets.getByName("main").res.srcDir(launcherResourcesDir)
     namespace = "com.youtubeyar.app"
     compileSdk = 36
 
@@ -80,6 +101,10 @@ android {
         resources.excludes += "/META-INF/DEPENDENCIES"
     }
     lint { abortOnError = true }
+}
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Resources") }.configureEach {
+    dependsOn(generateLauncherIconResources)
 }
 
 dependencies {
