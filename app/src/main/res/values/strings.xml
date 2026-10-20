@@ -15,6 +15,16 @@
     <string name="nav_checklist">چک‌لیست</string>
     <string name="nav_academy">آکادمی</string>
     <string name="settings_title">تنظیمات</string>
+    <string name="st_privacy">حریم خصوصی</string>
+    <string name="st_privacy_hint">ببینید چه اطلاعاتی روی گوشی می‌ماند و چه اطلاعاتی به سرویس‌های متصل ارسال می‌شود.</string>
+    <string name="privacy_title">سیاست حریم خصوصی</string>
+    <string name="privacy_intro">یوتیوب‌یار سرور اختصاصی برای جمع‌آوری اطلاعات ندارد. قابلیت‌هایی که به سرویس خارجی نیاز دارند، فقط اطلاعات لازم برای همان قابلیت را ارسال می‌کنند.</string>
+    <string name="privacy_local">ذخیره‌سازی محلی: تنظیمات، کلیدهای API واردشده، اطلاعات کانال، پیشرفت چک‌لیست، درس‌های خوانده‌شده و تاریخچه هوش مصنوعی در حافظه اختصاصی برنامه روی گوشی ذخیره می‌شوند. پاک‌کردن داده‌های برنامه یا حذف آن، این اطلاعات محلی را پاک می‌کند.</string>
+    <string name="privacy_youtube">YouTube Data API: هنگام تحلیل کانال، آیدی یا شناسه کانال و کلید YouTube API شما برای دریافت آمار عمومی کانال و ویدیوها به گوگل ارسال می‌شود. کلید API را در کنسول گوگل محدود کنید.</string>
+    <string name="privacy_ai">سرویس‌های هوش مصنوعی: اگر Gemini، OpenAI یا DeepSeek را فعال کنید، موضوع و متنی که برای تولید محتوا می‌فرستید همراه کلید شما به همان سرویس انتخاب‌شده ارسال می‌شود. حالت آفلاین درخواست‌ها را به سرویس هوش مصنوعی نمی‌فرستد.</string>
+    <string name="privacy_ads">تبلیغات: در صورت تنظیم کلید و زون‌های تپسل، SDK آن ممکن است اطلاعات دستگاه، شبکه و شناسه‌های تبلیغاتی را برای درخواست و سنجش تبلیغ پردازش کند. برای جزئیات، سیاست حریم خصوصی تپسل را مطالعه کنید. اگر کلید یا زون تبلیغ تنظیم نشده باشد، درخواست تبلیغ انجام نمی‌شود.</string>
+    <string name="privacy_billing">خریدها: پرداخت اشتراک و سوابق خرید توسط فروشگاه نصب‌شده مدیریت می‌شود. برنامه امضای خرید را با کلید عمومی واردشده در تنظیمات بررسی می‌کند؛ کلید عمومی رمز عبور نیست.</string>
+    <string name="privacy_control">انتخاب‌های شما: با انتخاب حالت آفلاین می‌توانید ارسال درخواست به سرویس هوش مصنوعی را متوقف کنید و کلیدهای API را از تنظیمات پاک کنید. برای استفاده از برنامه نیازی به ساخت حساب کاربری نیست.</string>
     <string name="premium_title">اشتراک ویژه</string>
     <string name="back">بازگشت</string>
 
@@ -108,6 +118,7 @@
     <string name="an_recent">۱۰ ویدیوی اخیر</string>
     <string name="an_insights">بینش‌های خودکار</string>
     <string name="an_not_found">کانالی با این آیدی پیدا نشد. آیدی را بدون @ یا لینک کامل بدهید.</string>
+    <string name="an_unsupported_url">لینک کانال معتبر نیست. از @handle یا لینک youtube.com/@handle یا youtube.com/channel/UC... استفاده کنید.</string>
     <string name="an_error">خطا در اتصال به یوتیوب. کلید API و اینترنت را چک کنید.</string>
     <string name="an_vs_you">مقایسه با کانال من</string>
     <string name="an_compare_hint">آیدی کانال رقیب را وارد کنید تا آمارش را کنار آمار کانال خودتان ببینید. آمار خودتان را از تب «کانال من» تحلیل کنید.</string>
@@ -131,7 +142,7 @@
     <string name="ai_copy_all">کپی همه</string>
     <string name="ai_history">تاریخچه</string>
     <string name="ai_clear">پاک‌سازی</string>
-    <string name="ai_offline_badge">آفلاین</string>
+    <string name="ai_offline_badge">آفلاین · الگو-محور</string>
     <string name="ai_remote_badge">آنلاین</string>
     <string name="ai_need_key">برای حالت آنلاین، سرویس و کلید API را در تنظیمات انتخاب کنید. فعلاً موتور آفلاین استفاده می‌شود.</string>
     <string name="ai_limit_left">تولیدهای باقی‌مانده امروز: %1$s</string>
@@ -196,6 +207,11 @@
     <string name="pr_restore_none">خرید فعالی پیدا نشد.</string>
     <string name="pr_restore_ok">اشتراک شما بازیابی شد ✓</string>
     <string name="pr_error">خطا در پرداخت: %1$s</string>
+    <string name="pr_ads_not_configured">تبلیغات جایزه‌ای هنوز تنظیم نشده‌اند. کلید اپلیکیشن و زون جایزه‌ای تپسل باید در تنظیمات انتشار وارد شوند.</string>
+    <string name="pr_no_ad_available">در حال حاضر تبلیغ جایزه‌ای در دسترس نیست. کمی بعد دوباره تلاش کنید.</string>
+    <string name="pr_rsa_missing">برای خرید امن، ابتدا کلید عمومی RSA را از پنل فروشگاه دریافت و در تنظیمات وارد کنید.</string>
+    <string name="pr_signature_invalid">امضای خرید تأیید نشد؛ اشتراک فعال نشده است. کلید عمومی فروشگاه را بررسی کنید.</string>
+    <string name="pr_purchase_invalid">اطلاعات خرید معتبر نیست؛ هیچ اشتراکی فعال نشده است.</string>
 
     <!-- تنظیمات -->
     <string name="st_appearance">ظاهر</string>
@@ -213,9 +229,11 @@
     <string name="st_yt_key_hint">رایگان از console.cloud.google.com — سرویس YouTube Data API v3 را فعال و کلید بسازید</string>
     <string name="st_ai_provider">سرویس هوش مصنوعی</string>
     <string name="st_ai_key">کلید API هوش مصنوعی</string>
-    <string name="st_ai_offline">آفلاین — بدون نیاز به کلید</string>
+    <string name="st_ai_offline">الگو-محور است، نه مدل زبانی محلی؛ بدون نیاز به کلید API.</string>
     <string name="st_bazaar_rsa">کلید عمومی RSA کافه‌بازار</string>
-    <string name="st_bazaar_hint">از پنل کافه‌بازار، بخش پرداخت درون‌برنامه‌ای (اختیاری — برای امنیت بیشتر)</string>
+    <string name="st_bazaar_hint">برای تأیید امن خرید کافه‌بازار، کلید عمومی RSA را از پنل فروشگاه کپی کنید. بدون کلید معتبر، خرید فعال نمی‌شود.</string>
+    <string name="st_myket_rsa">کلید عمومی RSA مایکت</string>
+    <string name="st_myket_hint">اگر از مایکت خرید می‌کنید، کلید عمومی جداگانه را از پنل مایکت دریافت و اینجا وارد کنید.</string>
     <string name="st_reminder_section">یادآور روزانه</string>
     <string name="st_reminder">یادآوری وظایف روزانه</string>
     <string name="st_reminder_desc">هر روز یک نوتیفیکیشن دوستانه یادتان می‌آورد وظایف امروز را انجام دهید.</string>

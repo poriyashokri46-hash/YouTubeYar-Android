@@ -4,9 +4,20 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- آیکون یوتیوب‌یار بر اساس تصویر ارسالی: دکمه پخش و فلش رشد سبز -->
-    <path android:fillColor="#D92722" android:pathData="M24,12 H84 C99,12 106,21 106,36 V72 C106,87 97,96 82,96 H26 C11,96 2,87 2,72 V36 C2,21 11,12 24,12 Z" />
-    <path android:fillColor="#FFFFFF" android:pathData="M42,34 C40,33 38,35 38,38 V70 C38,73 41,75 44,73 L72,57 C75,55 75,52 72,50 Z" />
-    <path android:strokeColor="#79C94A" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M30,101 L48,77 L61,89 L83,59" />
-    <path android:fillColor="#79C94A" android:pathData="M73,58 L91,51 L88,72 Z" />
+    <!-- Adaptive-icon safe area: red play button and green growth arrow from the supplied artwork -->
+    <path
+        android:fillColor="#D92722"
+        android:pathData="M26,10 H82 C94,10 100,18 100,30 V66 C100,78 92,86 80,86 H28 C16,86 8,78 8,66 V30 C8,18 16,10 26,10 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39,29 C36,27 33,30 33,34 V62 C33,66 36,68 40,66 L69,51 C72,49 72,46 69,44 Z" />
+    <path
+        android:strokeColor="#79C94A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M30,91 L45,70 L57,80 L77,53" />
+    <path
+        android:fillColor="#79C94A"
+        android:pathData="M68,53 L88,46 L84,68 Z" />
 </vector>

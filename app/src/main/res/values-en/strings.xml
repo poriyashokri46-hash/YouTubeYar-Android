@@ -8,6 +8,16 @@
     <string name="nav_checklist">Checklist</string>
     <string name="nav_academy">Academy</string>
     <string name="settings_title">Settings</string>
+    <string name="st_privacy">Privacy policy</string>
+    <string name="st_privacy_hint">Review what data stays on your device and what is sent to connected services.</string>
+    <string name="privacy_title">Privacy policy</string>
+    <string name="privacy_intro">YouTubeYar has no app-owned backend server. Features that need external services send only the data required for that feature.</string>
+    <string name="privacy_local">Local storage: settings, entered API keys, channel preferences, checklist progress, lesson progress and AI history are stored on your device using Android app storage. Clearing app data or uninstalling the app removes this local data.</string>
+    <string name="privacy_youtube">YouTube Data API: when you analyze a channel, its handle or channel ID and your YouTube API key are sent to Google to retrieve public channel and video statistics. Do not use an unrestricted API key.</string>
+    <string name="privacy_ai">AI providers: if you enable Gemini, OpenAI or DeepSeek, the topic and prompt you submit are sent to the provider you selected using your API key. Offline mode does not send prompts to an AI provider.</string>
+    <string name="privacy_ads">Advertising: when you configure and enable Tapsell, its SDK may process device, network and advertising-related information to request and measure ads. Review Tapsell’s privacy terms for details. Ads are not requested when the configured ad zones or app key are missing.</string>
+    <string name="privacy_billing">Purchases: subscription checkout and purchase records are handled by the installed app store. The app verifies signed purchase data locally with the public key you enter in Settings; the public key is not a password.</string>
+    <string name="privacy_control">Your choices: you can disable online AI by selecting Offline, remove API keys in Settings, and stop using advertising features. No app account is required.</string>
     <string name="premium_title">Premium</string>
     <string name="back">Back</string>
 
@@ -97,6 +107,7 @@
     <string name="an_recent">Last 10 videos</string>
     <string name="an_insights">Auto insights</string>
     <string name="an_not_found">No channel found with that handle. Enter the handle without @ or paste the full link.</string>
+    <string name="an_unsupported_url">Invalid channel URL. Use @handle, youtube.com/@handle, or youtube.com/channel/UC...</string>
     <string name="an_error">Error connecting to YouTube. Check your API key and internet.</string>
     <string name="an_vs_you">Compare with my channel</string>
     <string name="an_compare_hint">Enter a competitor\'s handle to see their stats next to yours. Analyze your own channel from the "My channel" tab first.</string>
@@ -119,7 +130,7 @@
     <string name="ai_copy_all">Copy all</string>
     <string name="ai_history">History</string>
     <string name="ai_clear">Clear</string>
-    <string name="ai_offline_badge">Offline</string>
+    <string name="ai_offline_badge">Offline · template-based</string>
     <string name="ai_remote_badge">Online</string>
     <string name="ai_need_key">For online mode pick a service and enter an API key in Settings. The offline engine is used meanwhile.</string>
     <string name="ai_limit_left">Generations left today: %1$s</string>
@@ -181,6 +192,11 @@
     <string name="pr_restore_none">No active purchase found.</string>
     <string name="pr_restore_ok">Your subscription was restored ✓</string>
     <string name="pr_error">Payment error: %1$s</string>
+    <string name="pr_ads_not_configured">Rewarded ads are not configured yet. Set the Tapsell app key and rewarded-ad zone before release.</string>
+    <string name="pr_no_ad_available">No rewarded ad is available right now. Please try again later.</string>
+    <string name="pr_rsa_missing">For secure checkout, enter the store’s public RSA key in Settings before buying.</string>
+    <string name="pr_signature_invalid">The purchase signature could not be verified, so Premium was not activated. Check the store’s public key.</string>
+    <string name="pr_purchase_invalid">The purchase data is invalid. No subscription was activated.</string>
 
     <string name="st_appearance">Appearance</string>
     <string name="st_theme">Theme</string>
@@ -197,9 +213,11 @@
     <string name="st_yt_key_hint">Free from console.cloud.google.com — enable YouTube Data API v3 and create a key</string>
     <string name="st_ai_provider">AI service</string>
     <string name="st_ai_key">AI API key</string>
-    <string name="st_ai_offline">Offline — no key needed</string>
+    <string name="st_ai_offline">Template-based rules, not a local language model; no API key needed.</string>
     <string name="st_bazaar_rsa">Cafe Bazaar RSA public key</string>
-    <string name="st_bazaar_hint">From your Cafe Bazaar panel, in-app billing section (optional — for extra security)</string>
+    <string name="st_myket_rsa">Myket RSA public key</string>
+    <string name="st_myket_hint">If you buy through Myket, get its separate public key from the Myket developer panel and enter it here.</string>
+    <string name="st_bazaar_hint">Enter the public RSA key from the Cafe Bazaar developer panel. Purchases cannot be activated without a valid signature.</string>
     <string name="st_reminder_section">Daily reminder</string>
     <string name="st_reminder">Remind me about daily tasks</string>
     <string name="st_reminder_desc">A friendly daily notification reminding you to complete today\'s tasks.</string>

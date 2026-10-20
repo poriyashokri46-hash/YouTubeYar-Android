@@ -309,9 +309,8 @@ fun DashboardScreen(navController: NavController, premium: Boolean, vm: Dashboar
             }
 
             item { Spacer(Modifier.height(2.dp)) }
+            item { if (!premium) TapsellBanner() }
         }
-
-        TapsellBanner(premiumActive = premium)
     }
 
     if (showDialog) {
@@ -347,11 +346,12 @@ private fun EtaSection(entries: List<ProgressEntry>) {
     val etaSubs = if (subsPerDay > 0) ((1000 - last.subscribers) / subsPerDay).toLong() else -1
     val etaHours = if (hoursPerDay > 0) ((4000 - last.watchHours) / hoursPerDay).toLong() else -1
 
-    fun daysText(days: Long): String =
-        stringResource(R.string.dash_eta_days, if (persian) Fmt.fa(days.toString()) else days.toString())
-
-    val etaTextSubs = if (etaSubs >= 0) daysText(etaSubs) else stringResource(R.string.dash_eta_need_data)
-    val etaTextHours = if (etaHours >= 0) daysText(etaHours) else stringResource(R.string.dash_eta_need_data)
+    val etaTextSubs = if (etaSubs >= 0) {
+        stringResource(R.string.dash_eta_days, if (persian) Fmt.fa(etaSubs.toString()) else etaSubs.toString())
+    } else stringResource(R.string.dash_eta_need_data)
+    val etaTextHours = if (etaHours >= 0) {
+        stringResource(R.string.dash_eta_days, if (persian) Fmt.fa(etaHours.toString()) else etaHours.toString())
+    } else stringResource(R.string.dash_eta_need_data)
 
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), shape = RoundedCornerShape(14.dp)) {
         Column(Modifier.padding(12.dp)) {

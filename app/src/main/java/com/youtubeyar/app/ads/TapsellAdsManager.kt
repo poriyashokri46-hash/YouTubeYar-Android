@@ -1,192 +1,235 @@
 package com.youtubeyar.app.ads
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
-import android.widget.FrameLayout
+import android.content.ContextWrapper
+import android.view.View
+import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.youtubeyar.app.data.SettingsRepository
+import com.youtubeyar.app.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.tapsell.sdk.Tapsell
-import ir.tapsell.sdk.TapsellAd
-import ir.tapsell.sdk.TapsellAdRequestConfiguration
-import ir.tapsell.sdk.TapsellAdStateListener
-import ir.tapsell.sdk.TapsellError
+import ir.tapsell.sdk.TapsellAdRequestListener
+import ir.tapsell.sdk.TapsellAdRequestOptions
+import ir.tapsell.sdk.TapsellAdShowListener
 import ir.tapsell.sdk.TapsellShowOptions
-import ir.tapsell.sdk.bannerads.BannerSize
-import ir.tapsell.sdk.bannerads.TapsellBannerAd
-import ir.tapsell.sdk.bannerads.TapsellBannerAdListener
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import ir.tapsell.sdk.bannerads.TapsellBannerType
+import ir.tapsell.sdk.bannerads.TapsellBannerView
+import ir.tapsell.sdk.bannerads.TapsellBannerViewEventListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * مدیریت تبلیغات تپسل (بنر + میان‌پرده + جایزه‌ای).
- *
- * ⚠️ راه‌اندازی (خیلی مهم):
- * کلیدهای واقعی را در app/src/main/res/values/strings.xml جای‌گذاری کنید:
- *   tapsell_app_key            → کلید اپلیکیشن از پنل تپسل (tapsell.ir)
- *   tapsell_zone_banner        → زون بنر
- *   tapsell_zone_interstitial  → زون میان‌پرده
- *   tapsell_zone_rewarded      → زون جایزه‌ای
- * تا وقتی کلیدها خالی باشند، تبلیغات کاملاً غیرفعال است و اپ بدون خطا کار می‌کند.
- *
- * اگر نسخه SDK تپسل که Gradle دانلود می‌کند امضای متدها را کمی تغییر داده باشد،
- * فقط همین فایل را مطابق مستندات رسمی docs.tapsell.ir به‌روز کنید.
- */
+/** Tapsell SDK 4.9.x integration using the current request/show listener API. */
 @Singleton
 class TapsellAdsManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val settings: SettingsRepository
+    @ApplicationContext private val context: Context
 ) {
-
     private var initialized = false
-    private var interstitialReady: TapsellAd? = null
-    private val _rewardGranted = MutableStateFlow(false)
-    val rewardGranted: StateFlow<Boolean> = _rewardGranted
+    private var interstitialAdId: String? = null
+    private var interstitialZoneId: String? = null
+    private var interstitialRequestInFlight = false
+    private var successfulFreeAiGenerations = 0
 
-    companion object {
-        // کلیدها از strings.xml خوانده می‌شوند (بخش بالای فایل values/strings.xml)
-        fun appKey(ctx: Context) = ctx.getString(com.youtubeyar.app.R.string.tapsell_app_key)
-        fun bannerZone(ctx: Context) = ctx.getString(com.youtubeyar.app.R.string.tapsell_zone_banner)
-        fun interstitialZone(ctx: Context) = ctx.getString(com.youtubeyar.app.R.string.tapsell_zone_interstitial)
-        fun rewardedZone(ctx: Context) = ctx.getString(com.youtubeyar.app.R.string.tapsell_zone_rewarded)
-    }
+    private fun appKey(): String = context.getString(R.string.tapsell_app_key).trim()
+    private fun bannerZone(): String = context.getString(R.string.tapsell_zone_banner).trim()
+    private fun interstitialZone(): String = context.getString(R.string.tapsell_zone_interstitial).trim()
+    private fun rewardedZone(): String = context.getString(R.string.tapsell_zone_rewarded).trim()
 
-    private fun isConfigured(): Boolean = appKey(context).isNotBlank()
+    private fun isConfigured(): Boolean = appKey().isNotBlank()
+    fun isRewardedConfigured(): Boolean = isConfigured() && rewardedZone().isNotBlank()
 
+    @Synchronized
     fun initIfNeeded() {
         if (initialized || !isConfigured()) return
-        try {
-            Tapsell.initialize(context, appKey(context))
-            initialized = true
-        } catch (_: Exception) {
-        }
+        val application = context.applicationContext as? Application ?: return
+        Tapsell.initialize(application, appKey())
+        initialized = true
     }
 
-    /** آیا تبلیغ نشان داده شود؟ (پرمیوم‌ها تبلیغ نمی‌بینند) */
-    fun adsEnabled(premiumActive: Boolean): Boolean = !premiumActive && isConfigured()
-
-    /* ------------------------------ میان‌پرده ------------------------------ */
-
     fun preloadInterstitial() {
-        if (!isConfigured()) return
+        val zone = interstitialZone()
+        if (!isConfigured() || zone.isBlank() || interstitialRequestInFlight) return
         initIfNeeded()
-        try {
-            val config = TapsellAdRequestConfiguration(context, interstitialZone(context))
-            Tapsell.requestAd(config, object : TapsellAdStateListener {
-                override fun onAdRequested() {}
-                override fun onAdFilled(ad: TapsellAd) {
-                    interstitialReady = ad
+        interstitialRequestInFlight = true
+        Tapsell.requestAd(
+            context,
+            zone,
+            TapsellAdRequestOptions(),
+            object : TapsellAdRequestListener() {
+                override fun onAdAvailable(adId: String) {
+                    interstitialAdId = adId
+                    interstitialZoneId = zone
+                    interstitialRequestInFlight = false
                 }
-                override fun onAdError(error: TapsellError) {}
-                override fun onAdNotAvailable() {}
-                override fun onAdShowed(ad: TapsellAd) {}
-                override fun onAdOpened(ad: TapsellAd) {}
-                override fun onAdClosed(ad: TapsellAd) {
-                    interstitialReady = null
-                    preloadInterstitial() // بارگذاری بعدی
+
+                override fun onError(message: String) {
+                    interstitialRequestInFlight = false
+                    interstitialAdId = null
+                    interstitialZoneId = null
                 }
-                override fun onAdRewarded(ad: TapsellAd, rewards: Map<String, String>) {}
-            })
-        } catch (_: Exception) {
-        }
+            }
+        )
     }
 
     fun showInterstitial(activity: Activity) {
+        val adId = interstitialAdId
+        val zone = interstitialZoneId
+        if (!isConfigured() || adId.isNullOrBlank() || zone.isNullOrBlank()) {
+            preloadInterstitial()
+            return
+        }
+        interstitialAdId = null
+        interstitialZoneId = null
         try {
-            interstitialReady?.show(activity, TapsellShowOptions())
+            Tapsell.showAd(
+                activity,
+                zone,
+                adId,
+                TapsellShowOptions(),
+                object : TapsellAdShowListener() {
+                    override fun onOpened() = Unit
+                    override fun onClosed() { preloadInterstitial() }
+                    override fun onError(message: String) { preloadInterstitial() }
+                    override fun onAdClicked() = Unit
+                    override fun onRewarded(completed: Boolean) = Unit
+                }
+            )
         } catch (_: Exception) {
+            preloadInterstitial()
         }
     }
 
-    /* ------------------------------ جایزه‌ای ------------------------------ */
+    /** Show an interstitial only after three successful free AI generations. */
+    fun recordSuccessfulAiGeneration(activity: Activity, premium: Boolean) {
+        val shouldShow = synchronized(this) {
+            if (premium) {
+                false
+            } else {
+                successfulFreeAiGenerations += 1
+                if (successfulFreeAiGenerations >= 3) {
+                    successfulFreeAiGenerations = 0
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+        if (shouldShow) showInterstitial(activity)
+    }
 
-    /**
-     * پخش ویدیوی جایزه‌ای: بعد از تماشای کامل، آنلاک ۲۴ ساعته ویژه فعال می‌شود.
-     */
-    fun showRewarded(activity: Activity, onReward: () -> Unit, onFail: (String) -> Unit) {
+    fun showRewarded(
+        activity: Activity,
+        onReward: () -> Unit,
+        onFail: (String) -> Unit
+    ) {
         if (!isConfigured()) {
             onFail("NOT_CONFIGURED")
             return
         }
+        val zone = rewardedZone()
+        if (zone.isBlank()) {
+            onFail("REWARDED_ZONE_MISSING")
+            return
+        }
         initIfNeeded()
-        try {
-            val config = TapsellAdRequestConfiguration(context, rewardedZone(context))
-            Tapsell.requestAd(config, object : TapsellAdStateListener {
-                override fun onAdRequested() {}
-                override fun onAdFilled(ad: TapsellAd) {
+        var completed = false
+        Tapsell.requestAd(
+            activity,
+            zone,
+            TapsellAdRequestOptions(),
+            object : TapsellAdRequestListener() {
+                override fun onAdAvailable(adId: String) {
+                    if (completed) return
                     try {
-                        ad.show(activity, TapsellShowOptions())
+                        Tapsell.showAd(
+                            activity,
+                            zone,
+                            adId,
+                            TapsellShowOptions(),
+                            object : TapsellAdShowListener() {
+                                override fun onOpened() = Unit
+                                override fun onClosed() {
+                                    if (!completed) {
+                                        completed = true
+                                        onFail("AD_CLOSED_NO_REWARD")
+                                    }
+                                }
+                                override fun onError(message: String) {
+                                    if (!completed) {
+                                        completed = true
+                                        onFail("SHOW_FAILED")
+                                    }
+                                }
+                                override fun onAdClicked() = Unit
+                                override fun onRewarded(isRewarded: Boolean) {
+                                    if (completed) return
+                                    completed = true
+                                    if (isRewarded) onReward() else onFail("NO_REWARD")
+                                }
+                            }
+                        )
                     } catch (e: Exception) {
-                        onFail(e.message ?: "SHOW_FAILED")
+                        if (!completed) {
+                            completed = true
+                            onFail(e.message ?: "SHOW_FAILED")
+                        }
                     }
                 }
-                override fun onAdError(error: TapsellError) = onFail(error.message ?: "AD_ERROR")
-                override fun onAdNotAvailable() = onFail("NO_AD")
-                override fun onAdShowed(ad: TapsellAd) {}
-                override fun onAdOpened(ad: TapsellAd) {}
-                override fun onAdClosed(ad: TapsellAd) {}
-                override fun onAdRewarded(ad: TapsellAd, rewards: Map<String, String>) {
-                    _rewardGranted.value = true
-                    onReward()
+
+                override fun onError(message: String) {
+                    if (!completed) {
+                        completed = true
+                        onFail("AD_ERROR")
+                    }
                 }
-            })
-        } catch (e: Exception) {
-            onFail(e.message ?: "REQUEST_FAILED")
-        }
+            }
+        )
     }
 }
 
-/**
- * بنر تپسل به‌صورت Composable — در انتهای صفحات اصلی استفاده می‌شود.
- * اگر زون بنر خالی باشد، هیچ ویویی رندر نمی‌شود.
- */
 @Composable
-fun TapsellBanner(
-    premiumActive: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val zone = TapsellAdsManager.bannerZone(context)
-    val appKey = TapsellAdsManager.appKey(context)
-    if (premiumActive || zone.isBlank() || appKey.isBlank()) return
+fun TapsellBanner(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    val appKey = stringResource(R.string.tapsell_app_key).trim()
+    val zone = stringResource(R.string.tapsell_zone_banner).trim()
+    if (activity == null || appKey.isBlank() || zone.isBlank()) return
 
-    val container = remember { FrameLayout(context) }
-    DisposableEffect(Unit) {
-        var ad: TapsellBannerAd? = null
-        try {
-            Tapsell.initialize(context, appKey)
-            ad = TapsellBannerAd(context, zone, BannerSize.BANNER_320x50, object : TapsellBannerAdListener {
-                override fun onAdRequested() {}
-                override fun onAdFilled(view: android.view.ViewGroup) {
-                    container.removeAllViews()
-                    container.addView(
-                        view,
-                        FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT
-                        )
-                    )
-                }
-                override fun onAdError(message: String) {}
-                override fun onAdNoBid() {}
-            })
-        } catch (_: Exception) {
-        }
-        onDispose { ad = null }
+    val bannerView = remember(activity, zone) {
+        LayoutInflater.from(activity).inflate(R.layout.tapsell_banner, null, false) as TapsellBannerView
+    }
+    DisposableEffect(bannerView, appKey, zone) {
+        val application = activity.application
+        Tapsell.initialize(application, appKey)
+        bannerView.setEventListener(object : TapsellBannerViewEventListener {
+            override fun onNoAdAvailable() { bannerView.visibility = View.GONE }
+            override fun onNoNetwork() { bannerView.visibility = View.GONE }
+            override fun onError(errorMessage: String) { bannerView.visibility = View.GONE }
+            override fun onRequestFilled() { bannerView.visibility = View.VISIBLE }
+            override fun onHideBannerView() { bannerView.visibility = View.GONE }
+            override fun onAdClicked() = Unit
+        })
+        bannerView.loadAd(activity, zone, TapsellBannerType.BANNER_320x50)
+        onDispose { bannerView.destroy() }
     }
     AndroidView(
-        factory = { container },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(50.dp)
+        factory = { bannerView },
+        modifier = modifier.fillMaxWidth().height(50.dp)
     )
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

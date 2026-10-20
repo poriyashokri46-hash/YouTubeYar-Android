@@ -1,13 +1,14 @@
 package com.youtubeyar.app.ai
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +23,7 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
     data class ProviderInfo(val id: String, val name: String, val keyHint: String)
 
     val providers: List<ProviderInfo> = listOf(
-        ProviderInfo("offline", "آفلاین (داخل اپ)", "نیاز به کلید ندارد"),
+        ProviderInfo("offline", "آفلاین (داخل اپ)", "الگو-محور؛ مدل زبانی محلی نیست"),
         ProviderInfo("gemini", "Google Gemini", "کلید رایگان از aistudio.google.com"),
         ProviderInfo("openai", "OpenAI", "کلید از platform.openai.com"),
         ProviderInfo("deepseek", "DeepSeek", "کلید از platform.deepseek.com")
@@ -30,23 +31,17 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
 
     suspend fun generate(provider: String, apiKey: String, prompt: String): Result<String> {
         if (apiKey.isBlank()) return Result.failure(IllegalStateException("NO_KEY"))
-        if (prompt.isBlank()) return Result.failure(IllegalArgumentException("EMPTY_PROMPT"))
-        if (provider !in setOf("gemini", "openai", "deepseek")) {
-            return Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
-        }
-
-        // OkHttp execute() is blocking; never perform it on the caller/UI dispatcher.
         return withContext(Dispatchers.IO) {
             try {
                 val text = when (provider) {
                     "gemini" -> callGemini(apiKey, prompt)
                     "openai" -> callOpenAiCompatible("https://api.openai.com/v1/chat/completions", apiKey, "gpt-4o-mini", prompt)
                     "deepseek" -> callOpenAiCompatible("https://api.deepseek.com/chat/completions", apiKey, "deepseek-chat", prompt)
-                    else -> error("UNREACHABLE_PROVIDER")
+                    else -> return@withContext Result.failure(IllegalArgumentException("UNKNOWN_PROVIDER"))
                 }
                 if (text.isBlank()) Result.failure(IllegalStateException("EMPTY_RESPONSE"))
-                else Result.success(text.trim())
-            } catch (e: kotlinx.coroutines.CancellationException) {
+                else Result.success(text)
+            } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Result.failure(e)
@@ -55,16 +50,17 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
     }
 
     private suspend fun callGemini(key: String, prompt: String): String {
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$key"
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent"
         val body = JSONObject().apply {
             put("contents", JSONArray().put(JSONObject().put("parts", JSONArray().put(JSONObject().put("text", prompt)))))
         }
         val request = Request.Builder().url(url)
+            .header("x-goog-api-key", key)
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
         client.newCall(request).execute().use { resp ->
             val json = JSONObject(resp.body?.string().orEmpty())
-            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}")
+            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}: ${json.optJSONObject("error")?.optString("message")}")
             return json.getJSONArray("candidates").getJSONObject(0)
                 .getJSONObject("content").getJSONArray("parts").getJSONObject(0)
                 .getString("text")
@@ -85,7 +81,7 @@ class RemoteAiProvider @Inject constructor(private val client: OkHttpClient) {
             .build()
         client.newCall(request).execute().use { resp ->
             val json = JSONObject(resp.body?.string().orEmpty())
-            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}")
+            if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}: ${json.optJSONObject("error")?.optString("message")}")
             return json.getJSONArray("choices").getJSONObject(0)
                 .getJSONObject("message").getString("content")
         }

@@ -64,7 +64,7 @@ import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.ads.TapsellAdsManager
 import com.youtubeyar.app.ads.TapsellBanner
-import com.youtubeyar.app.ai.AiHistory
+import com.youtubeyar.app.data.AiHistory
 import com.youtubeyar.app.ai.AiResult
 import com.youtubeyar.app.ai.AiSection
 import com.youtubeyar.app.ai.AiTool
@@ -76,7 +76,9 @@ import com.youtubeyar.app.data.SettingsRepository
 import com.youtubeyar.app.ui.Routes
 import com.youtubeyar.app.ui.components.SectionCard
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -105,6 +107,8 @@ class AiViewModel @Inject constructor(
 
     private val _ui = MutableStateFlow(UiState())
     val ui = _ui.asStateFlow()
+    private val _generationCompleted = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val generationCompleted = _generationCompleted.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -153,6 +157,7 @@ class AiViewModel @Inject constructor(
                 result = result,
                 remaining = settingsRepository.remainingAiUses()
             )
+            _generationCompleted.tryEmit(Unit)
         }
     }
 
@@ -185,11 +190,10 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
         ToolUi(AiTool.IDEAS, Icons.Filled.Lightbulb)
     )
 
-    // نمایش تبلیغ میان‌پرده بعد از تولید (برای غیر پرمیوم‌ها)
-    LaunchedEffect(ui.result) {
-        val r = ui.result
-        if (r != null && !premium) {
-            (context as? Activity)?.let { vm.adsManager.showInterstitial(it) }
+    // Interstitials are rate-limited by the ads manager and never interrupt every generation.
+    LaunchedEffect(premium) {
+        vm.generationCompleted.collect {
+            (context as? Activity)?.let { vm.adsManager.recordSuccessfulAiGeneration(it, premium) }
         }
     }
 
@@ -376,9 +380,8 @@ fun AiScreen(navController: NavController, premium: Boolean, vm: AiViewModel = h
                     ResultSection(section, clipboard)
                 }
             }
+            item { if (!premium) TapsellBanner() }
         }
-
-        TapsellBanner(premiumActive = premium)
     }
 }
 

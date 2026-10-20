@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +48,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.youtubeyar.app.R
 import com.youtubeyar.app.data.AcademyContent
-import com.youtubeyar.app.data.Lesson
+import com.youtubeyar.app.data.AcademyContent.Lesson
 import com.youtubeyar.app.data.SettingsRepository
 import com.youtubeyar.app.ui.components.SectionCard
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -179,7 +180,7 @@ fun AcademyScreen(navController: NavController, vm: AcademyViewModel = hiltViewM
 }
 
 @Composable
-private fun LessonDetail(lesson: Lesson, isEn: Boolean, done: Boolean, onToggleDone: () -> Unit) {
+private fun ColumnScope.LessonDetail(lesson: Lesson, isEn: Boolean, done: Boolean, onToggleDone: () -> Unit) {
     Column(
         Modifier
             .weight(1f)

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Legacy launcher icon for Android versions below adaptive-icon support -->
+    <path android:fillColor="#1A1A1F" android:pathData="M0,0 H108 V108 H0 Z" />
+    <path
+        android:fillColor="#D92722"
+        android:pathData="M26,10 H82 C94,10 100,18 100,30 V66 C100,78 92,86 80,86 H28 C16,86 8,78 8,66 V30 C8,18 16,10 26,10 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39,29 C36,27 33,30 33,34 V62 C33,66 36,68 40,66 L69,51 C72,49 72,46 69,44 Z" />
+    <path
+        android:strokeColor="#79C94A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M30,91 L45,70 L57,80 L77,53" />
+    <path android:fillColor="#79C94A" android:pathData="M68,53 L88,46 L84,68 Z" />
+</vector>

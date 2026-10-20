@@ -71,6 +71,7 @@ interface YouTubeService {
         @Query("part") parts: String,
         @Query("forHandle") forHandle: String?,
         @Query("id") id: String?,
+        @Query("forUsername") forUsername: String?,
         @Query("key") key: String
     ): ChannelResponse
 

@@ -6,6 +6,7 @@
 package com.android.vending.billing;
 
 import android.os.Bundle;
+import java.util.List;
 
 interface IInAppBillingService {
     int isBillingSupported(int apiVersion, String packageName, String type);

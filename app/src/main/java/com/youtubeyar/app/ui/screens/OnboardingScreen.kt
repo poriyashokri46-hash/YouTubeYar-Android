@@ -1,5 +1,6 @@
 package com.youtubeyar.app.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import com.youtubeyar.app.R
 import com.youtubeyar.app.ui.MainViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(mainViewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
