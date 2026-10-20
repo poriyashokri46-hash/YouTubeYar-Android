@@ -4,13 +4,12 @@
     <!-- Public RSA key injected by release CI; used to verify Bazaar purchase signatures. -->
     <string name="bazaar_rsa_public_key" translatable="false"></string>
 
-    <!-- کلیدهای تپسل — این‌ها را از پنل tapsell.ir پر کنید -->
     <!-- App key is injected at build time from the TAPSELL_APP_KEY Actions secret. -->
-    <string name="tapsell_zone_banner" translatable="false">6ad7cab1be0ef33af832fffb</string>
-    <string name="tapsell_zone_interstitial" translatable="false">6ad7ca5fbe0ef33af832fff9</string>
-    <string name="tapsell_zone_rewarded" translatable="false">6ad7ca84be0ef33af832fffa</string>
-    <!-- Stored for the instant-video format; current UI does not request this format yet. -->
-    <string name="tapsell_zone_video_instant" translatable="false">6ad7ca5fbe0ef33af832fff9</string>
+    <!-- Zone IDs are the user's current registered Tapsell zones. -->
+    <string name="tapsell_zone_banner" translatable="false">6ad51458dbb6193e678e1107</string>
+    <string name="tapsell_zone_interstitial" translatable="false">6ad513558898a04387439a73</string>
+    <string name="tapsell_zone_rewarded" translatable="false">6ad511d6e997da249533ddd9</string>
+    <string name="tapsell_zone_video_instant" translatable="false">6ad512941906ec224bd3fcce</string>
 
     <!-- ناوبری -->
     <string name="nav_home">خانه</string>
