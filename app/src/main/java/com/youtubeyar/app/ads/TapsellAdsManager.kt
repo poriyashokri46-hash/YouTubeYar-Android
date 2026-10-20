@@ -38,6 +38,7 @@ class TapsellAdsManager @Inject constructor(
     private var interstitialAdId: String? = null
     private var interstitialZoneId: String? = null
     private var interstitialRequestInFlight = false
+    private var successfulFreeAiGenerations = 0
 
     private fun appKey(): String = context.getString(R.string.tapsell_app_key).trim()
     private fun bannerZone(): String = context.getString(R.string.tapsell_zone_banner).trim()
@@ -106,6 +107,24 @@ class TapsellAdsManager @Inject constructor(
         } catch (_: Exception) {
             preloadInterstitial()
         }
+    }
+
+    /** Show an interstitial only after three successful free AI generations. */
+    fun recordSuccessfulAiGeneration(activity: Activity, premium: Boolean) {
+        val shouldShow = synchronized(this) {
+            if (premium) {
+                false
+            } else {
+                successfulFreeAiGenerations += 1
+                if (successfulFreeAiGenerations >= 3) {
+                    successfulFreeAiGenerations = 0
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+        if (shouldShow) showInterstitial(activity)
     }
 
     fun showRewarded(
