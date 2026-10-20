@@ -118,6 +118,7 @@
     <string name="an_recent">۱۰ ویدیوی اخیر</string>
     <string name="an_insights">بینش‌های خودکار</string>
     <string name="an_not_found">کانالی با این آیدی پیدا نشد. آیدی را بدون @ یا لینک کامل بدهید.</string>
+    <string name="an_unsupported_url">لینک کانال معتبر نیست. از @handle یا لینک youtube.com/@handle یا youtube.com/channel/UC... استفاده کنید.</string>
     <string name="an_error">خطا در اتصال به یوتیوب. کلید API و اینترنت را چک کنید.</string>
     <string name="an_vs_you">مقایسه با کانال من</string>
     <string name="an_compare_hint">آیدی کانال رقیب را وارد کنید تا آمارش را کنار آمار کانال خودتان ببینید. آمار خودتان را از تب «کانال من» تحلیل کنید.</string>
