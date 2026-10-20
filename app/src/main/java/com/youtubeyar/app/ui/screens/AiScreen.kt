@@ -118,46 +118,70 @@ class AiViewModel @Inject constructor(
 
     fun generate(tool: AiTool, topic: String, tone: AiTone, premium: Boolean) {
         if (topic.isBlank() || _ui.value.loading) return
+
+        // Set the loading flag before launching the coroutine so rapid taps cannot
+        // start multiple generations before DataStore responds.
+        _ui.value = _ui.value.copy(loading = true, note = null, limitReached = false)
         viewModelScope.launch {
-            if (!premium) {
-                val allowed = settingsRepository.consumeAiUse()
-                if (!allowed) {
-                    _ui.value = _ui.value.copy(limitReached = true, loading = false)
-                    return@launch
+            try {
+                if (!premium) {
+                    val allowed = settingsRepository.consumeAiUse()
+                    if (!allowed) {
+                        _ui.value = _ui.value.copy(
+                            limitReached = true,
+                            remaining = settingsRepository.remainingAiUses()
+                        )
+                        return@launch
+                    }
                 }
-            }
-            val s = settingsRepository.current()
-            _ui.value = _ui.value.copy(loading = true, note = null, limitReached = false)
-            val niche = s.channelNiche.ifBlank { topic }
-            val isEnglish = Locale.getDefault().language != "fa"
-            var result: AiResult? = null
 
-            if (s.aiProvider != "offline" && s.aiApiKey.isNotBlank()) {
-                val prompt = remote.buildPrompt(tool, topic, niche, tone)
-                remote.generate(s.aiProvider, s.aiApiKey, prompt).fold(
-                    onSuccess = { text ->
-                        result = AiResult(tool, topic, listOf(AiSection("نتایج", text)), s.aiProvider)
-                    },
-                    onFailure = { _ui.value = _ui.value.copy(note = "REMOTE_FAILED") }
-                )
-            }
-            if (result == null) {
-                result = OfflineAiEngine.generate(tool, topic, niche, tone, isEnglish)
-            }
+                val s = settingsRepository.current()
+                val niche = s.channelNiche.ifBlank { topic }
+                val isEnglish = Locale.getDefault().language != "fa"
+                var result: AiResult? = null
 
-            db.aiHistoryDao().insert(
-                AiHistory(
-                    toolType = tool.id,
-                    topic = topic,
-                    result = result!!.sections.joinToString("\n\n") { "${it.title}:\n${it.content}" }
+                if (s.aiProvider != "offline" && s.aiApiKey.isNotBlank()) {
+                    val remoteResult = runCatching {
+                        val prompt = remote.buildPrompt(tool, topic, niche, tone)
+                        remote.generate(s.aiProvider, s.aiApiKey, prompt)
+                    }.getOrElse { Result.failure(it) }
+
+                    remoteResult.fold(
+                        onSuccess = { text ->
+                            if (text.isNotBlank()) {
+                                result = AiResult(tool, topic, listOf(AiSection("نتایج", text)), s.aiProvider)
+                            } else {
+                                _ui.value = _ui.value.copy(note = "REMOTE_FAILED")
+                            }
+                        },
+                        onFailure = { _ui.value = _ui.value.copy(note = "REMOTE_FAILED") }
+                    )
+                }
+
+                val finalResult = result ?: OfflineAiEngine.generate(tool, topic, niche, tone, isEnglish)
+                db.aiHistoryDao().insert(
+                    AiHistory(
+                        toolType = tool.id,
+                        topic = topic,
+                        result = finalResult.sections.joinToString("\n\n") { "${it.title}:\n${it.content}" }
+                    )
                 )
-            )
-            _ui.value = _ui.value.copy(
-                loading = false,
-                result = result,
-                remaining = settingsRepository.remainingAiUses()
-            )
-            _generationCompleted.tryEmit(Unit)
+                _ui.value = _ui.value.copy(
+                    result = finalResult,
+                    remaining = settingsRepository.remainingAiUses()
+                )
+                _generationCompleted.tryEmit(Unit)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _ui.value = _ui.value.copy(
+                    note = "GENERATION_FAILED",
+                    remaining = runCatching { settingsRepository.remainingAiUses() }
+                        .getOrDefault(_ui.value.remaining)
+                )
+            } finally {
+                _ui.value = _ui.value.copy(loading = false)
+            }
         }
     }
 
