@@ -1,4 +1,4 @@
-name: Build test APK for Cafe Bazaar
+name: Build signed Cafe Bazaar release artifacts
 
 on:
   push:
@@ -11,37 +11,98 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout working branch
         uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: Build installable debug APK for initial testing
-        run: ./gradlew --no-daemon assembleDebug
-      - name: Run unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
-      - name: Run Android lint
-        run: ./gradlew --no-daemon lintDebug
-      - name: Prepare test APK and checksum
+
+      - name: Restore release keystore from repository secret
         shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          mkdir -p dist
-          cp app/build/outputs/apk/debug/*.apk dist/YouTubeYar-2.0.0-test-debug.apk
-          (cd dist && sha256sum YouTubeYar-2.0.0-test-debug.apk > SHA256SUMS.txt)
-      - name: Upload test APK
-        if: always() && hashFiles('dist/YouTubeYar-2.0.0-test-debug.apk') != ''
+          if [[ -z "${ANDROID_KEYSTORE_BASE64:-}" || -z "${ANDROID_KEYSTORE_PASSWORD:-}" || -z "${ANDROID_KEY_ALIAS:-}" || -z "${ANDROID_KEY_PASSWORD:-}" ]]; then
+            echo "One or more Android signing secrets are missing."
+            exit 1
+          fi
+          export ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/YouTubeYar-release.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_FILE"
+          chmod 600 "$ANDROID_KEYSTORE_FILE"
+          keytool -list -keystore "$ANDROID_KEYSTORE_FILE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+          echo "ANDROID_KEYSTORE_FILE=$ANDROID_KEYSTORE_FILE" >> "$GITHUB_ENV"
+
+      - name: Run unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Run Android lint
+        run: ./gradlew --no-daemon lintDebug
+
+      - name: Build signed release App Bundle
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/YouTubeYar-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon bundleRelease
+          test -s app/build/outputs/bundle/release/app-release.aab
+
+      - name: Generate Cafe Bazaar BIN with the official bundle signer
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/YouTubeYar-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bundle-signer" dist
+          curl --fail --silent --show-error --location \
+            "https://github.com/cafebazaar/bundle-signer/releases/download/v0.1.13/bundlesigner-0.1.13.jar" \
+            --output "$RUNNER_TEMP/bundle-signer/bundlesigner-0.1.13.jar"
+          test -s "$RUNNER_TEMP/bundle-signer/bundlesigner-0.1.13.jar"
+          java -jar "$RUNNER_TEMP/bundle-signer/bundlesigner-0.1.13.jar" genbin -v \
+            --v2-signing-enabled true \
+            --v3-signing-enabled false \
+            --bundle app/build/outputs/bundle/release/app-release.aab \
+            --bin dist \
+            --ks "$ANDROID_KEYSTORE_FILE" \
+            --ks-pass "env:ANDROID_KEYSTORE_PASSWORD" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --key-pass "env:ANDROID_KEY_PASSWORD"
+          bin_file="$(find dist -maxdepth 1 -type f -name '*.bin' ! -name 'YouTubeYar-2.0.0.bin' -print -quit)"
+          if [[ -z "$bin_file" || ! -s "$bin_file" ]]; then
+            echo "The official bundle signer did not produce a BIN file."
+            exit 1
+          fi
+          cp "$bin_file" dist/YouTubeYar-2.0.0.bin
+          cp app/build/outputs/bundle/release/app-release.aab dist/YouTubeYar-2.0.0.aab
+          (cd dist && sha256sum YouTubeYar-2.0.0.aab YouTubeYar-2.0.0.bin > SHA256SUMS.txt)
+          echo "Release AAB and Bazaar BIN were generated."
+
+      - name: Upload Cafe Bazaar release artifacts
+        if: always() && hashFiles('dist/YouTubeYar-2.0.0.aab', 'dist/YouTubeYar-2.0.0.bin') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: YouTubeYar-2.0.0-test-apk
+          name: YouTubeYar-2.0.0-cafe-bazaar
           path: dist/*
           if-no-files-found: error
           retention-days: 14
