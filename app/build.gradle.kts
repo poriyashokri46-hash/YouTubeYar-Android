@@ -18,8 +18,7 @@ val hasReleaseSigning = !releaseKeystorePath.isNullOrBlank()
 val launcherResourcesDir = layout.buildDirectory.dir("generated/res/launcherIcons")
 val generateLauncherIconResources by tasks.registering {
     val fullIcon = layout.projectDirectory.file("launcher-assets/ic_launcher_full.jpg.b64")
-    val adaptiveIcon = layout.projectDirectory.file("launcher-assets/ic_launcher_adaptive.jpg.b64")
-    inputs.files(fullIcon, adaptiveIcon)
+    inputs.file(fullIcon)
     outputs.dir(launcherResourcesDir)
     doLast {
         val outputRoot = launcherResourcesDir.get().asFile
@@ -27,9 +26,20 @@ val generateLauncherIconResources by tasks.registering {
         val adaptiveTarget = java.io.File(outputRoot, "drawable-nodpi/ic_launcher_artwork.jpg")
         fullTarget.parentFile.mkdirs()
         adaptiveTarget.parentFile.mkdirs()
-        val decoder = java.util.Base64.getDecoder()
-        fullTarget.writeBytes(decoder.decode(fullIcon.asFile.readText().trim()))
-        adaptiveTarget.writeBytes(decoder.decode(adaptiveIcon.asFile.readText().trim()))
+        val imageBytes = java.util.Base64.getDecoder().decode(fullIcon.asFile.readText().trim())
+        fullTarget.writeBytes(imageBytes)
+
+        // Adaptive icons are masked by Android. Scale the artwork into the central safe zone.
+        val source = javax.imageio.ImageIO.read(java.io.ByteArrayInputStream(imageBytes))
+        val safeSize = 128
+        val canvas = java.awt.image.BufferedImage(192, 192, java.awt.image.BufferedImage.TYPE_INT_RGB)
+        val graphics = canvas.createGraphics()
+        graphics.color = java.awt.Color.BLACK
+        graphics.fillRect(0, 0, 192, 192)
+        graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+        graphics.drawImage(source, (192 - safeSize) / 2, (192 - safeSize) / 2, safeSize, safeSize, null)
+        graphics.dispose()
+        javax.imageio.ImageIO.write(canvas, "jpg", adaptiveTarget)
     }
 }
 
