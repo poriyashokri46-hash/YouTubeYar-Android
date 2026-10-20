@@ -173,7 +173,7 @@ class BillingManager @Inject constructor(
         scope.launch {
             val storeSettings = runCatching { settings.current() }.getOrNull()
             val publicKey = when (pendingMarket) {
-                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa.orEmpty()
+                BAZAAR_PACKAGE -> storeSettings?.bazaarRsa?.takeIf { it.isNotBlank() } ?: context.getString(com.youtubeyar.app.R.string.bazaar_rsa_public_key).trim()
                 MYKET_PACKAGE -> storeSettings?.myketRsa.orEmpty()
                 else -> ""
             }
