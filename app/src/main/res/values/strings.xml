@@ -203,11 +203,11 @@
     <string name="pr_buy">خرید اشتراک</string>
     <string name="pr_restore">بازیابی خرید</string>
     <string name="pr_rewarded_title">پول ندارید؟ مشکل نیست!</string>
-    <string name="pr_rewarded_desc">یک تبلیغ را کامل تماشا کنید و ۲ بار استفاده از ابزارهای هوش مصنوعی دریافت کنید.</string>
-    <string name="pr_watch_ad">۲ استفاده رایگان با تبلیغ</string>
+    <string name="pr_rewarded_desc">با تماشای کامل هر تبلیغ، ۲ بار استفاده از ابزارهای هوش مصنوعی دریافت کنید. هر بار که این اعتبار تمام شود، می‌توانید تبلیغ دیگری ببینید.</string>
+    <string name="pr_watch_ad">دریافت ۲ استفاده با تماشای تبلیغ</string>
     <string name="pr_store_missing">هیچ فروشگاهی (کافه‌بازار یا مایکت) روی گوشی نصب نیست. ابتدا یکی را نصب کنید.</string>
     <string name="pr_price_unavailable">قیمت از فروشگاه دریافت نشد</string>
-    <string name="pr_thanks">خرید شما ثبت شد. از حمایت شما سپاسگزاریم! ❤️</string>
+    <string name="pr_thanks">عملیات با موفقیت انجام شد. از همراهی شما سپاسگزاریم! ❤️</string>
     <string name="pr_cancelled">خرید لغو شد.</string>
     <string name="pr_restore_none">خرید فعالی پیدا نشد.</string>
     <string name="pr_restore_ok">اشتراک شما بازیابی شد ✓</string>
@@ -255,5 +255,5 @@
 
     <!-- پرده پرمیوم -->
     <string name="gate_title">این قابلیت ویژه است</string>
-    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا با تماشای تبلیغ، ۲ استفاده اضافه بگیرید.</string>
+    <string name="gate_desc">سقف رایگان امروز پر شده. اشتراک بگیرید یا با تماشای تبلیغ، ۲ استفاده اضافه از هوش مصنوعی بگیرید.</string>
 </resources>
