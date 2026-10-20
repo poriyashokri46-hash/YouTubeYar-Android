@@ -1,5 +1,6 @@
 package com.youtubeyar.app.youtube
 
+import java.net.URI
 import java.time.Duration
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -17,9 +18,29 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
 
     suspend fun analyze(handleOrId: String, apiKey: String): Result<ChannelAnalysis> {
         if (apiKey.isBlank()) return Result.failure(IllegalStateException("NO_API_KEY"))
-        val input = handleOrId.trim().removePrefix("https://www.youtube.com/")
-            .removePrefix("http://youtube.com/").removePrefix("www.")
-            .removePrefix("youtube.com/").removePrefix("@").takeIf { it.isNotBlank() }
+        val rawInput = handleOrId.trim()
+        if (rawInput.isBlank()) return Result.failure(IllegalArgumentException("EMPTY_HANDLE"))
+
+        // Accept bare handles, @handles, channel IDs, and common YouTube channel URLs.
+        val looksLikeUrl = rawInput.contains("youtube.com/", ignoreCase = true) ||
+            rawInput.startsWith("http://", ignoreCase = true) ||
+            rawInput.startsWith("https://", ignoreCase = true)
+        val pathOrInput = if (looksLikeUrl) {
+            runCatching {
+                val candidate = if (rawInput.startsWith("http://", true) || rawInput.startsWith("https://", true))
+                    rawInput else "https://$rawInput"
+                URI(candidate).path.orEmpty()
+            }.getOrElse { return Result.failure(IllegalArgumentException("INVALID_CHANNEL_URL")) }
+        } else rawInput
+
+        val path = pathOrInput.trim().trim('/')
+        val input = when {
+            path.startsWith("channel/") -> path.removePrefix("channel/").substringBefore('/')
+            path.startsWith("@") -> path.removePrefix("@").substringBefore('/')
+            path.startsWith("c/") || path.startsWith("user/") -> path.substringAfter('/').substringBefore('/')
+            else -> path.substringBefore('/')
+        }.removePrefix("@").trim()
+            .takeIf { it.isNotBlank() }
             ?: return Result.failure(IllegalArgumentException("EMPTY_HANDLE"))
 
         val isChannelId = input.startsWith("UC") && input.length >= 20
@@ -53,20 +74,22 @@ class ChannelAnalyzer @Inject constructor(private val service: YouTubeService) {
                 if (ids.isNotEmpty()) {
                     recent = service.videos("snippet,statistics", ids.joinToString(","), apiKey).items
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                return Result.failure(e)
             }
         }
 
         val avgViews = if (recent.isNotEmpty()) recent.mapNotNull { it.statistics.viewCount.toLongOrNull() }.average().toLong() else 0
-        val engagement = if (recent.isNotEmpty() && avgViews > 0) {
-            val likes = recent.sumOf { (it.statistics.likeCount.toLongOrNull() ?: 0).toDouble() }
-            val comments = recent.sumOf { (it.statistics.commentCount.toLongOrNull() ?: 0).toDouble() }
-            ((likes + comments) / avgViews) * 100.0
+        val totalRecentViews = recent.sumOf { it.statistics.viewCount.toLongOrNull() ?: 0L }
+        val engagement = if (totalRecentViews > 0) {
+            val likes = recent.sumOf { it.statistics.likeCount.toLongOrNull() ?: 0L }
+            val comments = recent.sumOf { it.statistics.commentCount.toLongOrNull() ?: 0L }
+            ((likes + comments).toDouble() / totalRecentViews.toDouble()) * 100.0
         } else 0.0
 
         val ageDays = try {
             val published = OffsetDateTime.parse(channel.snippet.publishedAt, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            Duration.between(published.toInstant(), Instant.now()).toDays()
+            Duration.between(published.toInstant(), Instant.now()).toDays().coerceAtLeast(0)
         } catch (_: Exception) { 0 }
 
         val videosPerMonth = if (ageDays > 0 && videoCount > 0)
