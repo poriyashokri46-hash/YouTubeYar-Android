@@ -29,9 +29,14 @@ object OfflineAiEngine {
 
     private fun pick(list: List<String>, rnd: Random): String = list[rnd.nextInt(list.size)]
 
+    private fun hashtag(value: String): String =
+        value.trim()
+            .replace(Regex("\\s+"), "_")
+            .replace(Regex("[^\\p{L}\\p{N}_]"), "")
+            .trim('_')
+
     private val powerWordsFa = listOf(
-        "راز", "رایگان", "سریع", "شگفت‌انگیز", "حرفه‌ای", "نابود", "هیچ‌کس", "موفق", "رشد",
-        "بهترین", "آسان", "واقعی", "قطعی", "محرمانه", "قطعی"
+        "رایگان", "سریع", "حرفه‌ای", "موفق", "رشد", "بهترین", "آسان", "آموزش", "راهنما", "مرحله‌به‌مرحله"
     )
 
     /* ------------------------------- عنوان‌ها ------------------------------ */
@@ -44,17 +49,17 @@ object OfflineAiEngine {
         val funPrefixes = listOf("😂 ", "🔥 ", "😱 ")
 
         val base = listOf(
-            "$n ترفند $topic که هیچ‌کس به شما نمی‌گوید",
+            "$n نکته کاربردی برای شروع $topic",
             "چطور مشکلات رایج در $topic را بررسی کنیم؟",
             "راهنمای مرحله‌به‌مرحله برای یادگیری $topic",
             "$n اشتباه رایج هنگام کار با $topic",
             "نکته‌های مهم برای پیشرفت در $topic",
             "$topic: روش کلاسیک یا مدرن؟ انتخاب درست",
             "چه چیزهایی هنگام تمرین $topic باید بررسی کنید؟",
-            "آموزش کامل $topic از صفر تا صد (مخصوص مبتدی‌ها)",
+            "راهنمای شروع $topic برای مبتدی‌ها",
             "روش‌های کاربردی برای شروع $topic",
             "$n ابزار و منبع برای شروع کار با $topic",
-            "همه‌چیز درباره $kw در یک ویدیو — $niche",
+            "مروری بر مفاهیم اصلی $kw در موضوع $niche",
             "نقشه راه یادگیری $topic از سطح مقدماتی"
         ).shuffled(rnd)
 
@@ -79,7 +84,7 @@ object OfflineAiEngine {
             "Key concepts to understand about $topic",
             "$topic: classic vs modern, which one wins?",
             "What to review when practicing $topic",
-            "The complete $topic guide for beginners ($niche)"
+            "Beginner’s guide to $topic ($niche)"
         ).shuffled(rnd)
     }
 
@@ -103,12 +108,12 @@ object OfflineAiEngine {
             "تعریف ساده و کاربردی $topic برای شروع",
             "قدم‌به‌قدم انجام دادن ${pick(kw.ifEmpty { listOf(topic) }, rnd)} بدون سردرگمی",
             "اشتباهات رایج که باید از اول از آن‌ها دوری کنید",
-            "نکات حرفه‌ای که زمان شما را نصف می‌کند",
+            "نکات تکمیلی برای تمرین بهتر",
             "منابع رایگان برای ادامه مسیر یادگیری"
         ).shuffled(rnd).take(4)
 
         return buildString {
-            appendLine("در این ویدیو همه‌چیز درباره $topic را می‌آموزید؛ از پایه‌ها تا نکات حرفه‌ای. اگر در مسیر $niche هستید، این ویدیو دقیقاً برای شما ساخته شده است.")
+            appendLine("این یک قالب پیشنهادی برای توضیحات ویدیویی درباره $topic است؛ بخش‌ها را متناسب با محتوای واقعی ویدیو ویرایش کنید. اگر موضوع کانال شما $niche است، نکات را با مثال‌های واقعی خودتان تکمیل کنید.")
             appendLine()
             appendLine("🔥 در این ویدیو یاد می‌گیرید:")
             bullets.forEach { appendLine("• $it") }
@@ -124,13 +129,13 @@ object OfflineAiEngine {
             appendLine()
             appendLine("💬 سؤال‌تان درباره $topic را در کامنت‌ها بنویسید.")
             appendLine()
-            appendLine("#$topic #آموزش_$topic #$niche")
+            appendLine("#${hashtag(topic)} #آموزش_${hashtag(topic)} #${hashtag(niche)}")
             appendLine("کلیدواژه‌ها: $topic، $kwLine، آموزش $topic")
         }
     }
 
     private fun enDescription(topic: String, niche: String): String = buildString {
-        appendLine("In this video you'll learn everything about $topic — from basics to pro tips. If you're into $niche, this one is for you.")
+        appendLine("Editable description template for a video about $topic. Adjust the sections to match what the video actually covers. For a $niche channel, include examples from your own content.")
         appendLine()
         appendLine("🔥 What you'll learn:")
         appendLine("• A simple, practical intro to $topic")
@@ -139,7 +144,7 @@ object OfflineAiEngine {
         appendLine("• Free resources to keep learning")
         appendLine()
         appendLine("📌 If this helped, like & subscribe for more $topic videos! 🔔")
-        appendLine("#$topic #$niche")
+        appendLine("#${hashtag(topic)} #${hashtag(niche)}")
     }
 
     /* -------------------------------- تگ‌ها ------------------------------- */
@@ -179,22 +184,22 @@ object OfflineAiEngine {
     /* ------------------------------- اسکریپت ------------------------------ */
 
     private fun faScript(topic: String, niche: String, tone: AiTone, rnd: Random): List<AiSection> {
-        val hook1 = "اگر تا حالا برای $topic زحمت کشیده‌اید ولی نتیجه نگرفته‌اید، تا پایان این ویدیو همراه من بمانید؛ چون دقیقاً همان چیزی را نشان می‌دهم که کسی به شما نمی‌گوید."
-        val hook2 = "این ویدیو را می‌توانید دو حاله داشته باشید: یا ادامه بدهید و $topic را برای همیشه یاد بگیرید، یا ببندید و همان فرصت را از دست بدهید!"
+        val hook1 = "اگر می‌خواهید با $topic آشنا شوید، در این ویدیو چند روش عملی برای بررسی و تمرین آن را مرور می‌کنیم."
+        val hook2 = "در این ویدیو یک مسیر پیشنهادی برای یادگیری $topic را مرحله‌به‌مرحله مرور می‌کنیم."
         val hook = if (tone == AiTone.ENTERTAINING) hook2 else pick(listOf(hook1, hook2), rnd)
 
         val sections = mutableListOf<AiSection>()
         sections += AiSection(
             "هوک شروع (0:00 تا 0:15)",
-            hook + "\n\nنکته: نتیجه نهایی را در ۵ ثانیه اول نشان دهید تا مخاطب بداند در پایان چه چیز منتظرش است."
+            hook + "\n\nنکته: اگر نتیجه نهایی قابل نمایش است، پیش‌نمایشی واقعی از آن را در ۵ ثانیه اول نشان دهید."
         )
         sections += AiSection(
             "معرفی کوتاه (0:15 تا 0:40)",
-            "سلام! من [نام شما] هستم و در کانال [نام کانال] درباره $niche حرف می‌زنیم. در این ویدیو قدم‌به‌قدم $topic را با هم جلو می‌بریم؛ بدون حاشیه و با مثال‌های واقعی. (دقت کنید: درخواست سابسکرایب را بعد از اولین ارزش واقعی ویدیو بگویید، نه اینجا!)"
+            "سلام! من [نام شما] هستم و در کانال [نام کانال] درباره $niche صحبت می‌کنیم. در این ویدیو $topic را قدم‌به‌قدم مرور می‌کنیم؛ مثال‌هایی را اضافه کنید که واقعاً در ویدیو نمایش می‌دهید. درخواست سابسکرایب را بعد از ارائه اولین نکته کاربردی مطرح کنید."
         )
         sections += AiSection(
             "بخش ۱ — چیست و چرا مهم است؟ (0:40 تا 3:00)",
-            "در این بخش $topic را با یک مثال ساده و ملموس تعریف کنید. به این سؤال پاسخ بدهید که «چرا الان برای مخاطب مهم است؟». یک عدد یا آمار جالب درباره $topic بگویید تا باورپذیری بالا برود. مهلت این بخش: حداکثر ۲ دقیقه؛ از حاشیه بپرهیزید."
+            "در این بخش $topic را با یک مثال ساده تعریف کنید و توضیح دهید چرا برای مخاطب مهم است. فقط در صورت داشتن منبع معتبر، آمار مرتبط ذکر کنید؛ در غیر این صورت از ادعای عددی استفاده نکنید. این بخش را کوتاه و روشن نگه دارید."
         )
         sections += AiSection(
             "بخش ۲ — قدم‌به‌قدم اجرا (3:00 تا 7:00)",
@@ -202,7 +207,7 @@ object OfflineAiEngine {
         )
         sections += AiSection(
             "بخش ۳ — اشتباهات و نکات طلایی (7:00 تا 9:00)",
-            "سه اشتباه رایجی که ۹۰٪ افراد در $topic می‌کنند را بگویید و راه‌حل هرکدام را سریع توضیح دهید. یک نکته مخصوص به بینندگان واقعی اضافه کنید که در هیچ‌جای دیگر پیدایش نمی‌کنند؛ این کار سهم ویدیو را در کامنت‌ها بالا می‌برد."
+            "چند اشتباه رایج در $topic را توضیح دهید و برای هرکدام راه‌حل قابل بررسی ارائه کنید. فقط مواردی را مطرح کنید که بتوانید با تجربه واقعی یا منبع معتبر پشتیبانی کنید؛ از آمار تأییدنشده و ادعای انحصاری پرهیز کنید."
         )
         sections += AiSection(
             "پایان و CTA (9:00 تا 9:40)",
@@ -212,7 +217,7 @@ object OfflineAiEngine {
     }
 
     private fun enScript(topic: String, niche: String): List<AiSection> = listOf(
-        AiSection("Hook (0:00-0:15)", "If you've tried $topic without results, watch till the end — I'll show you exactly what nobody tells you. Show the final result in the first 5 seconds."),
+        AiSection("Hook (0:00-0:15)", "Introduce the actual topic and the practical outcome this video can deliver. Show a real preview in the first 5 seconds, and adjust the promise to match the finished video."),
         AiSection("Intro (0:15-0:40)", "Hey, I'm [Your Name] and on [Channel] we talk about $niche. Today: $topic step by step."),
         AiSection("Part 1 — What & Why (0:40-3:00)", "Define $topic with a concrete example. Answer: why does this matter right now?"),
         AiSection("Part 2 — Step by Step (3:00-7:00)", "1) Setup 2) Main walkthrough on screen 3) Verify the result. Always explain the why."),
@@ -278,10 +283,17 @@ object OfflineAiEngine {
                 val titles = if (isEnglish) enTitles(topic, niche, rnd) else faTitles(topic, niche, tone, rnd)
                 val scored = titles.map { it to seoScore(it) }.sortedByDescending { it.second }
                 val list = scored.joinToString("\n") { (t, s) -> "[$s/10]  $t" }
-                listOf(
-                    AiSection("عنوان‌های پیشنهادی (مرتب بر اساس امتیاز سئو)", list),
-                    AiSection("تحلیل سئو", "امتیاز بر اساس: طول بهینه (۲۵ تا ۶۰ کاراکتر)، داشتن عدد، کلمات قدرتمند و ساختار سؤالی. عنوان با امتیاز ۸ به بالا را انتخاب کنید و حتماً با وعده ویدیو هم‌خوان باشد.")
-                )
+                if (isEnglish) {
+                    listOf(
+                        AiSection("Suggested titles (heuristic score, not an official YouTube metric)", list),
+                        AiSection("Scoring method", "This simple estimate uses title length, digits, selected descriptive words, and question structure. It does not measure YouTube ranking or predict performance. Pick a title that accurately matches the finished video.")
+                    )
+                } else {
+                    listOf(
+                        AiSection("عنوان‌های پیشنهادی (امتیاز تخمینی و غیررسمی)", list),
+                        AiSection("روش امتیازدهی", "این امتیاز یک تخمین ساده بر اساس طول عنوان، عدد، واژه‌های توصیفی و ساختار پرسشی است؛ معیار رسمی یوتیوب نیست و رتبه یا بازدید را پیش‌بینی نمی‌کند. عنوانی را انتخاب کنید که با محتوای واقعی ویدیو هم‌خوان باشد.")
+                    )
+                }
             }
             AiTool.DESCRIPTION -> if (isEnglish)
                 listOf(AiSection("Description", enDescription(topic, niche)))
