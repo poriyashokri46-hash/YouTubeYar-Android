@@ -15,7 +15,7 @@
     <string name="privacy_local">Local storage: settings, entered API keys, channel preferences, checklist progress, lesson progress and AI history are stored on your device using Android app storage. Clearing app data or uninstalling the app removes this local data.</string>
     <string name="privacy_youtube">YouTube Data API: when you analyze a channel, its handle or channel ID and your YouTube API key are sent to Google to retrieve public channel and video statistics. Do not use an unrestricted API key.</string>
     <string name="privacy_ai">AI providers: if you enable Gemini, OpenAI or DeepSeek, the topic and prompt you submit are sent to the provider you selected using your API key. Offline mode does not send prompts to an AI provider.</string>
-    <string name="privacy_ads">Advertising: when you configure and enable Tapsell, its SDK may process device, network and advertising-related information to request and measure ads. Review Tapsell's privacy terms for details. Ads are not requested when the configured ad zones or app key are missing.</string>
+    <string name="privacy_ads">Advertising: when you configure and enable Tapsell, its SDK may process device, network and advertising-related information to request and measure ads. Review Tapsell’s privacy terms for details. Ads are not requested when the configured ad zones or app key are missing.</string>
     <string name="privacy_billing">Purchases: subscription checkout and purchase records are handled by the installed app store. The app verifies signed purchase data locally with the public key you enter in Settings; the public key is not a password.</string>
     <string name="privacy_control">Your choices: you can disable online AI by selecting Offline, remove API keys in Settings, and stop using advertising features. No app account is required.</string>
     <string name="premium_title">Premium</string>
@@ -192,8 +192,8 @@
     <string name="pr_restore_none">No active purchase found.</string>
     <string name="pr_restore_ok">Your subscription was restored ✓</string>
     <string name="pr_error">Payment error: %1$s</string>
-    <string name="pr_rsa_missing">For secure checkout, enter the store's public RSA key in Settings before buying.</string>
-    <string name="pr_signature_invalid">The purchase signature could not be verified, so Premium was not activated. Check the store's public key.</string>
+    <string name="pr_rsa_missing">For secure checkout, enter the store’s public RSA key in Settings before buying.</string>
+    <string name="pr_signature_invalid">The purchase signature could not be verified, so Premium was not activated. Check the store’s public key.</string>
     <string name="pr_purchase_invalid">The purchase data is invalid. No subscription was activated.</string>
 
     <string name="st_appearance">Appearance</string>
