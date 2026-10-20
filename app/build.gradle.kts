@@ -122,8 +122,14 @@ android {
     lint { abortOnError = true }
 }
 
-tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Resources") }.configureEach {
-    dependsOn(generateLauncherIconResources)
+tasks.configureEach {
+    val needsLauncherResources =
+        (name.startsWith("generate") && name.endsWith("Resources")) ||
+        (name.startsWith("map") && name.endsWith("SourceSetPaths")) ||
+        (name.startsWith("merge") && name.endsWith("Resources"))
+    if (name != "generateLauncherIconResources" && needsLauncherResources) {
+        dependsOn(generateLauncherIconResources)
+    }
 }
 
 dependencies {
