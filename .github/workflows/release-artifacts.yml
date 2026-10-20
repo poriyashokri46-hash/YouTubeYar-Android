@@ -56,6 +56,7 @@ jobs:
       - name: Build signed release App Bundle
         shell: bash
         env:
+          TAPSELL_APP_KEY: ${{ secrets.TAPSELL_APP_KEY }}
           ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/YouTubeYar-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
